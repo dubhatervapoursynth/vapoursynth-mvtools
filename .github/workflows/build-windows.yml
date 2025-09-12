@@ -35,7 +35,7 @@ jobs:
             mingw-w64-x86_64-fftw
       - name: Build vs-mvtools
         run: |
-          meson setup build --buildtype release --prefer-static --default-library=static -Dcpp_link_args='-static'
+          meson setup build --buildtype release --prefer-static --default-library=static  -Dc_args='-march=x86-64-v3 -mtune=x86-64 -flto -fwhole-program-vtables -mprefer-vector-width=512' -Dcpp_args='-march=x86-64-v3 -mtune=x86-64 -flto -fwhole-program-vtables -mprefer-vector-width=512' -Dc_link_args='-static' -Dcpp_link_args='-static'
           meson compile -vC build
       - name: Export version
         run: |
@@ -72,7 +72,7 @@ jobs:
             mingw-w64-i686-fftw
       - name: Build vs-mvtools
         run: |
-          meson setup build --buildtype release --prefer-static --default-library=static -Dcpp_link_args='-static'
+          meson setup build --buildtype release --prefer-static --default-library=static -Dc_args='-march=x86-64-v3 -mtune=x86-64 -flto -fwhole-program-vtables -mno-gather' -Dcpp_args='-march=x86-64-v3 -mtune=x86-64 -flto -fwhole-program-vtables -mno-gather' -Dc_link_args='-static' -Dcpp_link_args='-static'
           meson compile -vC build
       - name: Export version
         run: |
