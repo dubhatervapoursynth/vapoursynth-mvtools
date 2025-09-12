@@ -58,21 +58,21 @@ jobs:
       - name: Setup MSYS2
         uses: msys2/setup-msys2@v2
         with:
-          msystem: CLANG32
+          msystem: MINGW32
           update: true
           install: >-
             base-devel
-            mingw-w64-clang-i686-jq
-            mingw-w64-clang-i686-clang
-            mingw-w64-clang-i686-pkg-config
-            mingw-w64-clang-i686-vapoursynth
-            mingw-w64-clang-i686-meson
-            mingw-w64-clang-i686-ninja
-            mingw-w64-clang-i686-nasm
-            mingw-w64-clang-i686-fftw
+            mingw-w64-i686-jq
+            mingw-w64-i686-gcc
+            mingw-w64-i686-pkg-config
+            mingw-w64-i686-vapoursynth
+            mingw-w64-i686-meson
+            mingw-w64-i686-ninja
+            mingw-w64-i686-nasm
+            mingw-w64-i686-fftw
       - name: Build vs-mvtools
         run: |
-          meson setup build --buildtype release --prefer-static --default-library=static -Dc_args='-march=x86-64-v3 -mtune=x86-64 -flto -fwhole-program-vtables -mno-gather' -Dcpp_args='-march=x86-64-v3 -mtune=x86-64 -flto -fwhole-program-vtables -mno-gather' -Dc_link_args='-static' -Dcpp_link_args='-static'
+          meson setup build --buildtype release --prefer-static --default-library=static -Dcpp_link_args='-static'
           meson compile -vC build
       - name: Export version
         run: |
