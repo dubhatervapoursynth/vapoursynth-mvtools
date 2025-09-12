@@ -45,6 +45,43 @@ jobs:
         with:
           name: mvtools-windows-x64-${{ env.ARTIFACT_VERSION }}
           path: build/libmvtools.dll
+  build-windows-x64-znver2:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: CLANG64
+          update: true
+          install: >-
+            base-devel
+            mingw-w64-clang-x86_64-jq
+            mingw-w64-clang-x86_64-clang
+            mingw-w64-clang-x86_64-pkg-config
+            mingw-w64-clang-x86_64-vapoursynth
+            mingw-w64-clang-x86_64-meson
+            mingw-w64-clang-x86_64-ninja
+            mingw-w64-clang-x86_64-nasm
+            mingw-w64-clang-x86_64-fftw
+      - name: Build vs-mvtools
+        run: |
+          meson setup build --buildtype release --prefer-static --default-library=static -Dc_args='-march=znver2 -mtune=znver2 -flto -fwhole-program-vtables -mprefer-vector-width=512' -Dcpp_args='-march=znver2 -mtune=znver2 -flto -fwhole-program-vtables -mprefer-vector-width=512' -Dc_link_args='-static' -Dcpp_link_args='-static'
+          meson compile -vC build
+      - name: Export version
+        run: |
+          echo "ARTIFACT_VERSION=$(meson introspect --projectinfo build | jq -r '.version')" >> $GITHUB_ENV
+      - name: Upload
+        uses: actions/upload-artifact@v4.3.3
+        with:
+          name: mvtools-windows-x64-${{ env.ARTIFACT_VERSION }}
+          path: build/libmvtools.dll
   build-windows-x86:
     runs-on: windows-latest
     defaults:
