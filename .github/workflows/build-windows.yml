@@ -21,21 +21,21 @@ jobs:
       - name: Setup MSYS2
         uses: msys2/setup-msys2@v2
         with:
-          msystem: MINGW64
+          msystem: CLANG64
           update: true
           install: >-
             base-devel
-            mingw-w64-x86_64-jq
-            mingw-w64-x86_64-gcc
-            mingw-w64-x86_64-pkg-config
-            mingw-w64-x86_64-vapoursynth
-            mingw-w64-x86_64-meson
-            mingw-w64-x86_64-ninja
-            mingw-w64-x86_64-nasm
-            mingw-w64-x86_64-fftw
+            mingw-w64-clang-x86_64-jq
+            mingw-w64-clang-x86_64-clang
+            mingw-w64-clang-x86_64-pkg-config
+            mingw-w64-clang-x86_64-vapoursynth
+            mingw-w64-clang-x86_64-meson
+            mingw-w64-clang-x86_64-ninja
+            mingw-w64-clang-x86_64-nasm
+            mingw-w64-clang-x86_64-fftw
       - name: Build vs-mvtools
         run: |
-          meson setup build --buildtype release --prefer-static --default-library=static  -Dc_args='-march=x86-64-v3 -mtune=x86-64 -flto -fwhole-program-vtables -mprefer-vector-width=512' -Dcpp_args='-march=x86-64-v3 -mtune=x86-64 -flto -fwhole-program-vtables -mprefer-vector-width=512' -Dc_link_args='-static' -Dcpp_link_args='-static'
+          meson setup build --buildtype release --prefer-static --default-library=static -Dc_args='-march=x86-64-v3 -mtune=x86-64 -flto -fwhole-program-vtables -mprefer-vector-width=512' -Dcpp_args='-march=x86-64-v3 -mtune=x86-64 -flto -fwhole-program-vtables -mprefer-vector-width=512' -Dc_link_args='-static' -Dcpp_link_args='-static'
           meson compile -vC build
       - name: Export version
         run: |
@@ -58,18 +58,18 @@ jobs:
       - name: Setup MSYS2
         uses: msys2/setup-msys2@v2
         with:
-          msystem: MINGW32
+          msystem: CLANG32
           update: true
           install: >-
             base-devel
-            mingw-w64-i686-jq
-            mingw-w64-i686-gcc
-            mingw-w64-i686-pkg-config
-            mingw-w64-i686-vapoursynth
-            mingw-w64-i686-meson
-            mingw-w64-i686-ninja
-            mingw-w64-i686-nasm
-            mingw-w64-i686-fftw
+            mingw-w64-clang-i686-jq
+            mingw-w64-clang-i686-clang
+            mingw-w64-clang-i686-pkg-config
+            mingw-w64-clang-i686-vapoursynth
+            mingw-w64-clang-i686-meson
+            mingw-w64-clang-i686-ninja
+            mingw-w64-clang-i686-nasm
+            mingw-w64-clang-i686-fftw
       - name: Build vs-mvtools
         run: |
           meson setup build --buildtype release --prefer-static --default-library=static -Dc_args='-march=x86-64-v3 -mtune=x86-64 -flto -fwhole-program-vtables -mno-gather' -Dcpp_args='-march=x86-64-v3 -mtune=x86-64 -flto -fwhole-program-vtables -mno-gather' -Dc_link_args='-static' -Dcpp_link_args='-static'
