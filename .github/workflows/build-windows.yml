@@ -80,7 +80,7 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v4.3.3
         with:
-          name: mvtools-windows-x64-${{ env.ARTIFACT_VERSION }}
+          name: mvtools-windows-x64-znver2-${{ env.ARTIFACT_VERSION }}
           path: build/libmvtools.dll
   build-windows-x86:
     runs-on: windows-latest
