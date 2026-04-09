@@ -1,6 +1,6 @@
 project('MVTools', 'c', 'cpp',
-        version: '24',
-        default_options: ['c_std=c99', 'cpp_std=c++11', 'buildtype=release', 'b_lto=true'],
+        version: '25',
+        default_options: ['c_std=c99', 'cpp_std=c++17', 'buildtype=release', 'b_lto=true'],
         meson_version: '>=0.46')
 
 
@@ -30,7 +30,14 @@ nasm_flags = [
 ]
 
 
-vapoursynth_dep = dependency('vapoursynth').partial_dependency(includes: true, compile_args: true)
+incdir = include_directories(
+    run_command(
+        find_program('python', 'python3'),
+        '-c',
+        'import vapoursynth as vs; print(vs.get_include())',
+        check: true,
+    ).stdout().strip()
+)
 
 
 sources = [
@@ -160,7 +167,7 @@ if host_cpu_family.startswith('x86')
 
   helper_libs += static_library('avx2',
                                 libavx2_sources,
-                                dependencies: vapoursynth_dep,
+                                include_directories: incdir,
                                 cpp_args: [cflags, '-mavx2', '-mtune=haswell'],
                                 install: false)
 endif
@@ -182,7 +189,6 @@ cxx = meson.get_compiler('cpp')
 
 
 deps = [
-  vapoursynth_dep,
   dependency('fftw3f'),
   cxx.find_library('m', required: false),
 ]
@@ -190,6 +196,7 @@ deps = [
 shared_module('mvtools',
               sources,
               dependencies: deps,
+              include_directories: incdir,
               link_args: ldflags,
               c_args: cflags,
               cpp_args: cflags,

@@ -1,0 +1,32 @@
+[build-system]
+requires = ["meson-python", "VapourSynth>=74"]
+build-backend = "mesonpy"
+
+[project]
+name = "vapoursynth-mvtools"
+description = "Motion estimation and denoising filter for VapourSynth"
+readme = "README.rst"
+requires-python = ">=3.12"
+license = "GPL-2.0"
+license-files = ["LICENSE"]
+keywords = ["video", "motion estimation", "denoising"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Plugins",
+    "Natural Language :: English",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX",
+    "Operating System :: Unix",
+    "Programming Language :: C++",
+    "Topic :: Multimedia :: Video",
+]
+dependencies = ["VapourSynth"]
+dynamic = ["version"]
+
+[project.urls]
+Repository = "https://github.com/dubhatervapoursynth/vapoursynth-mvtools.git"
+Issues = "https://github.com/dubhatervapoursynth/vapoursynth-mvtools/issues"
+
+[tool.meson-python.wheel]
+exclude = ["*/*.dll.a", "*/*.lib"]
