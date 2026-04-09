@@ -12,9 +12,9 @@ jobs:
         - arch: linux_aarch64
           runs-on: ubuntu-24.04-arm
         - arch: macosx_x86_64
-          runs-on: macos-26-intel
+          runs-on: macos-15-intel
         - arch: macosx_arm64
-          runs-on: macos-26
+          runs-on: macos-15
       fail-fast: false
 
     runs-on: ${{ matrix.runs-on }}
@@ -28,10 +28,11 @@ jobs:
       env:
         CIBW_BUILD: cp314-*
         CIBW_BUILD_FRONTEND: uv
+        CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=15
         CIBW_BEFORE_ALL_LINUX: >
-          dnf -y install fftw
+          dnf -y install fftw pkgconf
         CIBW_BEFORE_ALL_MACOS: >
-          brew install fftw
+          brew install fftw pkgconf
       with:
         output-dir: dist
         extras: uv
