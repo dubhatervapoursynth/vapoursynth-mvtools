@@ -31,12 +31,7 @@ nasm_flags = [
 
 
 incdir = include_directories(
-    run_command(
-        find_program('python', 'python3'),
-        '-c',
-        'import vapoursynth as vs; print(vs.get_include())',
-        check: true,
-    ).stdout().strip()
+  'vapoursynth/include'
 )
 
 
