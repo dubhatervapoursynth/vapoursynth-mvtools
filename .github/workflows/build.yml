@@ -28,6 +28,10 @@ jobs:
       env:
         CIBW_BUILD: cp314-*
         CIBW_BUILD_FRONTEND: uv
+        CIBW_BEFORE_ALL_LINUX: >
+          dnf -y install fftw &&
+        CIBW_BEFORE_ALL_MACOS: >
+          brew install fftw &&
       with:
         output-dir: dist
         extras: uv
