@@ -26,7 +26,8 @@ jobs:
 
     - uses: pypa/cibuildwheel@v3.4.0
       env:
-        CIBW_BUILD: cp314-*
+        CIBW_BUILD: cp312-*
+        CIBW_SKIP: cp312-musllinux*
         CIBW_BUILD_FRONTEND: uv
         CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=15
         CIBW_BEFORE_ALL_LINUX: >
