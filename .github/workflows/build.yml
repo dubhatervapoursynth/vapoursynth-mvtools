@@ -54,20 +54,21 @@ jobs:
 
     - uses: msys2/setup-msys2@v2
       with:
-        msystem: UCRT64
+        msystem: MINGW64
         update: true
         install: >-
           base-devel
-          mingw-w64-ucrt-x86_64_64-jq
-          mingw-w64-ucrt-x86_64-gcc
-          mingw-w64-ucrt-x86_64-pkg-config
-          mingw-w64-ucrt-x86_64-meson
-          mingw-w64-ucrt-x86_64-nasm
-          mingw-w64-ucrt-x86_64-fftw
-          mingw-w64-ucrt-x86_64-git
-          mingw-w64-ucrt-x86_64-ninja
-          mingw-w64-ucrt-x86_64-toolchain
-          mingw-w64-ucrt-x86_64-uv
+          mingw-w64-x86_64-jq
+          mingw-w64-x86_64-gcc
+          mingw-w64-x86_64-pkg-config
+          mingw-w64-x86_64-vapoursynth
+          mingw-w64-x86_64-meson
+          mingw-w64-x86_64-nasm
+          mingw-w64-x86_64-fftw
+          mingw-w64-x86_64-git
+          mingw-w64-x86_64-ninja
+          mingw-w64-x86_64-toolchain
+          mingw-w64-x86_64-uv
 
     - name: Build vs-mvtools
       run: |
