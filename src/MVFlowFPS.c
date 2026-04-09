@@ -754,7 +754,7 @@ static void VS_CC mvflowfpsCreate(const VSMap *in, VSMap *out, void *userData, V
 
     setFPS(&d.vi, numerator, denominator);
 
-    d.vi.numFrames = (int)(1 + (d.vi.numFrames - 1) * d.fb / d.fa);
+    d.vi.numFrames = (int)(d.vi.numFrames * d.fb / d.fa);
 
 
     if (d.mvbw_data.nWidth != d.vi.width || d.mvbw_data.nHeight != d.vi.height) {
