@@ -5,7 +5,7 @@ build-backend = "mesonpy"
 [project]
 name = "vapoursynth-mvtools"
 description = "Motion estimation and denoising filter for VapourSynth"
-readme = "README.rst"
+readme = "readme.rst"
 requires-python = ">=3.12"
 license = "GPL-2.0"
 license-files = ["LICENSE"]
