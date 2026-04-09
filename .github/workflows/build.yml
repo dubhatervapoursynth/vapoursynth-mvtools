@@ -62,7 +62,6 @@ jobs:
         update: true
         install: >-
           base-devel
-          mingw-w64-x86_64-jq
           mingw-w64-x86_64-gcc
           mingw-w64-x86_64-pkg-config
           mingw-w64-x86_64-meson
@@ -75,11 +74,7 @@ jobs:
 
     - name: Build vs-mvtools
       run: |
-        meson setup build --buildtype release --prefer-static --default-library=static -Dcpp_link_args='-static'
-        meson compile -vC build
-    - name: Export version
-      run: |
-        echo "ARTIFACT_VERSION=$(meson introspect --projectinfo build | jq -r '.version')" >> $GITHUB_ENV
+        python -m build -Csetup-args="-Dprefer_static=true" -Csetup-args="-Db_lto=true" -Csetup-args="-Dcpp_link_args=-static"
     - name: Fix tag
       run: |
         cd dist
