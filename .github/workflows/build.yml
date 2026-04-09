@@ -74,7 +74,7 @@ jobs:
 
     - name: Build vs-mvtools
       run: |
-        python -m build -Csetup-args="-Dprefer_static=true" -Csetup-args="-Db_lto=true" -Csetup-args="-Dcpp_link_args=-static"
+        uv build -Csetup-args="-Dprefer_static=true" -Csetup-args="-Db_lto=true" -Csetup-args="-Dcpp_link_args=-static"
     - name: Fix tag
       run: |
         cd dist
