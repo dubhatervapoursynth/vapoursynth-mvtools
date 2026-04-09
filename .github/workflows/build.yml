@@ -30,9 +30,9 @@ jobs:
         CIBW_BUILD_FRONTEND: uv
         CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=15
         CIBW_BEFORE_ALL_LINUX: >
-          dnf -y install fftw pkgconf
+          dnf -y install fftw pkgconf nasm
         CIBW_BEFORE_ALL_MACOS: >
-          brew install fftw pkgconf
+          brew install fftw pkgconf nasm
       with:
         output-dir: dist
         extras: uv
