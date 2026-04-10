@@ -188,6 +188,8 @@ deps = [
   cxx.find_library('m', required: false),
 ]
 
+py = import('python').find_installation(pure: false)
+
 shared_module('mvtools',
               sources,
               dependencies: deps,
