@@ -1,7 +1,7 @@
 project('MVTools', 'c', 'cpp',
         version: '26',
         default_options: ['c_std=c99', 'cpp_std=c++17', 'buildtype=release', 'b_lto=true'],
-        meson_version: '>=0.46')
+        meson_version: '>=1.2.3')
 
 
 warnings = [
