@@ -77,7 +77,7 @@ jobs:
           mingw-w64-clang-x86_64-fftw
           mingw-w64-clang-x86_64-toolchain
           mingw-w64-clang-x86_64-uv
-          mingw-w64-clang-x86_64-tools
+          mingw-w64-clang-x86_64-git
     - name: Build vs-mvtools
       run: |
         uv build -Csetup-args="-Dprefer_static=true" -Csetup-args="-Db_lto=true" -Csetup-args="-Dcpp_link_args=-static"
