@@ -196,7 +196,7 @@ shared_module('mvtools',
               c_args: cflags,
               cpp_args: cflags,
               link_with: helper_libs,
-              install: true
+              install: true,
               install_dir: py.get_install_dir() / 'vapoursynth/plugins',
               name_prefix: '',
 )
