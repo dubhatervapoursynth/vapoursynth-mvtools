@@ -1,5 +1,5 @@
 project('MVTools', 'c', 'cpp',
-        version: '25',
+        version: '26',
         default_options: ['c_std=c99', 'cpp_std=c++17', 'buildtype=release', 'b_lto=true'],
         meson_version: '>=0.46')
 
@@ -196,4 +196,7 @@ shared_module('mvtools',
               c_args: cflags,
               cpp_args: cflags,
               link_with: helper_libs,
-              install: true)
+              install: true
+              install_dir: py.get_install_dir() / 'vapoursynth/plugins',
+              name_prefix: '',
+)
