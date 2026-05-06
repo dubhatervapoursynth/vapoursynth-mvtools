@@ -19,7 +19,7 @@
 
 #include <stdio.h>
 
-#include <VSHelper.h>
+#include <VSHelper4.h>
 
 #include "CPU.h"
 #include "MVFrame.h"
@@ -1366,7 +1366,7 @@ void mvpUpdate(MVPlane *mvp, uint8_t *pSrc, int _nPitch) { //v2.0
 
 void mvpFillPlane(MVPlane *mvp, const uint8_t *pNewPlane, int nNewPitch) {
     if (!mvp->isFilled)
-        vs_bitblt(mvp->pPlane[0] + mvp->nOffsetPadding, mvp->nPitch, pNewPlane, nNewPitch, mvp->nWidth * mvp->bytesPerSample, mvp->nHeight);
+        vsh::bitblt(mvp->pPlane[0] + mvp->nOffsetPadding, mvp->nPitch, pNewPlane, nNewPitch, mvp->nWidth * mvp->bytesPerSample, mvp->nHeight);
     mvp->isFilled = 1;
 }
 
