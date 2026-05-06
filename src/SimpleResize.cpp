@@ -4,7 +4,8 @@
 // Only the name and the basic algorithm remain.
 
 #include <algorithm>
-#include <stdlib.h>
+#include <cstdlib>
+#include <cstring>
 
 #include "CPU.h"
 #include "SimpleResize.h"
@@ -27,8 +28,8 @@ static void InitTables(int *offsets, int *weights, int out, int in) {
     float leftmost = 0.5f;       // + shift
     float rightmost = in - 0.5f; // + shift
 
-    int leftmost_idx = VSMAX((int)leftmost, 0);
-    int rightmost_idx = VSMIN((int)rightmost, in - 1);
+    int leftmost_idx = std::max<(int>(leftmost, 0);
+    int rightmost_idx = std::min<int>(rightmost, in - 1);
 
     for (int i = 0; i < out; i++) {
         float position = (i + 0.5f) * (float)in / (float)out;
