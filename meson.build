@@ -1,11 +1,19 @@
 project('MVTools', 'c', 'cpp',
         version: '26',
-        default_options: ['c_std=c11', 'cpp_std=c++17', 'buildtype=debug', 'debug=true', 'b_lto=true'],
+        default_options: ['c_std=c11', 'cpp_std=c++17', 'buildtype=release', 'b_lto=true'],
         meson_version: '>=1.2.3')
 
 
+warnings = [
+  '-Wall',
+  '-Wextra',
+  '-Wshadow',
+]
+
 cflags = [
-  '-DPACKAGE_VERSION="11"',
+  warnings,
+  '-fvisibility=hidden',
+  '-DPACKAGE_VERSION="@0@"'.format(meson.project_version()),
 ]
 
 ldflags = [
@@ -113,7 +121,7 @@ helper_libs = []
 
 
 if host_cpu_family.startswith('x86')
-  cflags += ['-DMVTOOLS_X86=1']
+  cflags += ['-mfpmath=sse', '-msse2', '-DMVTOOLS_X86=1']
 
 
   nasm_sources = [
@@ -160,7 +168,7 @@ if host_cpu_family.startswith('x86')
   helper_libs += static_library('avx2',
                                 libavx2_sources,
                                 include_directories: incdir,
-                                cpp_args: cflags,
+                                cpp_args: [cflags, '-mavx2', '-mtune=haswell'],
                                 install: false)
 endif
 
@@ -181,6 +189,7 @@ cxx = meson.get_compiler('cpp')
 
 
 deps = [
+  dependency('fftw3f'),
   cxx.find_library('m', required: false),
 ]
 
