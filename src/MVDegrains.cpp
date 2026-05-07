@@ -40,7 +40,7 @@ struct MVDegrainData {
     const VSVideoInfo *vi;
 
     VSNode *super;
-    VSNode *vectors[12];
+    VSNode *vectors[12] = {};
 
     int64_t thSAD[3];
     int YUVplanes;
@@ -787,7 +787,7 @@ static void VS_CC mvdegrainCreate(const VSMap *in, VSMap *out, void *userData, V
     data = (MVDegrainData *)malloc(sizeof(d));
     *data = d;
 
-    const int numDeps = 2 + radius; // input clip, super, and corresponding backward and forward vectors.
+    const int numDeps = 2 + radius * 2; // input clip, super, and corresponding backward and forward vectors.
     VSFilterDependency deps[14] = { 
         {data->node, rpStrictSpatial},
         {data->super, rpGeneral},
