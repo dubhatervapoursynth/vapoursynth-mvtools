@@ -1,4 +1,0 @@
-option('with_nasm',
-       type: 'string',
-       value: 'nasm',
-       description: 'Location of the NASM executable. Only relevant on x86 hosts.')
