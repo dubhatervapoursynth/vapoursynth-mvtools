@@ -21,29 +21,27 @@ jobs:
 
     steps:
     - uses: actions/checkout@v6
-      with:
-        submodules: recursive
 
     - uses: pypa/cibuildwheel@v3.4.0
       env:
-        CIBW_BUILD: cp312-*
-        CIBW_SKIP: cp312-musllinux*
+        CIBW_BUILD: cp314-*
         CIBW_BUILD_FRONTEND: uv
         CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=15
         CIBW_BEFORE_ALL_LINUX: >
-          dnf -y install fftw fftw-devel pkgconf nasm
+          if command -v dnf >/dev/null 2>&1; then
+            dnf -y install fftw-devel nasm
+          else
+            apk add --no-cache fftw-dev nasm
+          fi
         CIBW_BEFORE_ALL_MACOS: >
-          brew install fftw pkgconf nasm
+          brew install fftw nasm
       with:
         output-dir: dist
         extras: uv
 
     - name: Fix tag
       run: |
-        cd dist
-        for whl in *.whl; do
-          pipx run wheel tags --remove --python-tag py3 --abi-tag none $whl
-        done
+        pipx run wheel tags --remove --python-tag py3 --abi-tag none dist/*.whl
 
     - uses: actions/upload-artifact@v7
       with:
