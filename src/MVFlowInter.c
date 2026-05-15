@@ -25,7 +25,6 @@
 #include <VapourSynth4.h>
 #include <VSHelper4.h>
 
-#include "Bullshit.h"
 #include "Fakery.h"
 #include "MaskFun.h"
 #include "MVAnalysisData.h"

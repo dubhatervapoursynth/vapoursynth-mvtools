@@ -6,7 +6,6 @@
 #include <VapourSynth4.h>
 #include <VSHelper4.h>
 
-#include "Bullshit.h"
 #include "CPU.h"
 #include "DCTFFTW.h"
 #include "GroupOfPlanes.h"
