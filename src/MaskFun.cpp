@@ -80,9 +80,9 @@ void CheckAndPadMaskSmall(uint8_t * VS_RESTRICT MaskSmall, int nBlkXP, int nBlkY
 
 static inline void ByteOccMask(uint8_t * VS_RESTRICT occMask, int occlusion, double occnorm, double fGamma) {
     if (fGamma == 1.0)
-        *occMask = std::max(*occMask, std::min((int)(255 * occlusion * occnorm), 255));
+        *occMask = std::max<uint8_t>(*occMask, std::min<int>(255 * occlusion * occnorm, 255));
     else
-        *occMask = std::max(*occMask, std::min((int)(255 * pow(occlusion * occnorm, fGamma)), 255));
+        *occMask = std::max<uint8_t>(*occMask, std::min<int>(255 * pow(occlusion * occnorm, fGamma), 255));
 }
 
 void MakeVectorOcclusionMaskTime(const FakeGroupOfPlanes *fgop, int isBackward, int nBlkX, int nBlkY, double dMaskNormDivider, double fGamma, int nPel, uint8_t * VS_RESTRICT occMask, ptrdiff_t occMaskPitch, int time256, int nBlkStepX, int nBlkStepY) { // analyse vectors field to detect occlusion
@@ -134,7 +134,7 @@ static unsigned char ByteNorm(int64_t sad, double dSADNormFactor, double fGamma)
 }
 
 
-void MakeSADMaskTime(const FakeGroupOfPlanes *fgop, int nBlkX, int nBlkY, double dSADNormFactor, double fGamma, int nPel, uint8_t * VS_RESTICT Mask, ptrdiff_t MaskPitch, int time256, int nBlkStepX, int nBlkStepY, int bitsPerSample) {
+void MakeSADMaskTime(const FakeGroupOfPlanes *fgop, int nBlkX, int nBlkY, double dSADNormFactor, double fGamma, int nPel, uint8_t * VS_RESTRICT Mask, ptrdiff_t MaskPitch, int time256, int nBlkStepX, int nBlkStepY, int bitsPerSample) {
     // Make approximate SAD mask at intermediate time
     //    double dSADNormFactor = 4 / (dMaskNormDivider*nBlkSizeX*nBlkSizeY);
     memset(Mask, 0, nBlkY * MaskPitch);
@@ -161,7 +161,7 @@ void MakeSADMaskTime(const FakeGroupOfPlanes *fgop, int nBlkX, int nBlkY, double
 }
 
 // Note about restrict: it appears that this function is always called with memory allocated from different malloc calls
-void MakeVectorSmallMasks(const FakeGroupOfPlanes *fgop, int nBlkX, int nBlkY, int16_t * VS_RESTICT VXSmallY, int pitchVXSmallY, int16_t * VS_RESTICT VYSmallY, int pitchVYSmallY) {
+void MakeVectorSmallMasks(const FakeGroupOfPlanes *fgop, int nBlkX, int nBlkY, int16_t * VS_RESTRICT VXSmallY, int pitchVXSmallY, int16_t * VS_RESTRICT VYSmallY, int pitchVYSmallY) {
     // make  vector vx and vy small masks
     for (int by = 0; by < nBlkY; by++) {
         for (int bx = 0; bx < nBlkX; bx++) {
@@ -175,7 +175,7 @@ void MakeVectorSmallMasks(const FakeGroupOfPlanes *fgop, int nBlkX, int nBlkY, i
     }
 }
 
-void VectorSmallMaskYToHalfUV(int16_t * VS_RESTICT VSmallY, int nBlkX, int nBlkY, int16_t *VS_RESTICT VSmallUV, int ratioUV) {
+void VectorSmallMaskYToHalfUV(int16_t * VS_RESTRICT VSmallY, int nBlkX, int nBlkY, int16_t *VS_RESTRICT VSmallUV, int ratioUV) {
     if (ratioUV == 2) {
         // YV12 colorformat
         for (int by = 0; by < nBlkY; by++) {
