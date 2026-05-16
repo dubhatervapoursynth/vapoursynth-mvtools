@@ -20,25 +20,20 @@
 #include <math.h>
 #include <stdint.h>
 #include <string.h>
+#include <stddef.h>
+#include <algorithm>
 
 #include "CommonFunctions.h"
 #include "CPU.h"
 #include "MaskFun.h"
 
 
-#if defined(MVTOOLS_X86)
-void selectFlowInterFunctions_AVX2(FlowInterSimpleFunction *simple, FlowInterFunction *regular, FlowInterExtraFunction *extra, int bitsPerSample);
-#endif
 
-
-#define max(a, b) ((a) > (b) ? (a) : (b))
-#define min(a, b) ((a) > (b) ? (b) : (a))
-
-
-void CheckAndPadSmallY(int16_t *VXSmallY, int16_t *VYSmallY, int nBlkXP, int nBlkYP, int nBlkX, int nBlkY) {
+// Note on restrict: this function appears to always be fed memory from separate malloc calls
+void CheckAndPadSmallY(int16_t *VS_RESTRICT VXSmallY, int16_t * VS_RESTRICT VYSmallY, int nBlkXP, int nBlkYP, int nBlkX, int nBlkY) {
     if (nBlkXP > nBlkX) { // fill right
         for (int j = 0; j < nBlkY; j++) {
-            int16_t VXright = min(VXSmallY[j * nBlkXP + nBlkX - 1], (int16_t)0); // not positive
+            int16_t VXright = std::min(VXSmallY[j * nBlkXP + nBlkX - 1], (int16_t)0); // not positive
             int16_t VYright = VYSmallY[j * nBlkXP + nBlkX - 1];
             // clone: multiple 2.7.30-
             for (int dx = nBlkX; dx < nBlkXP; dx++) {
@@ -50,7 +45,7 @@ void CheckAndPadSmallY(int16_t *VXSmallY, int16_t *VYSmallY, int nBlkXP, int nBl
     if (nBlkYP > nBlkY) { // fill bottom
         for (int i = 0; i < nBlkXP; i++) {
             int16_t VXbottom = VXSmallY[nBlkXP * (nBlkY - 1) + i];
-            int16_t VYbottom = min(VYSmallY[nBlkXP * (nBlkY - 1) + i], (int16_t)0);
+            int16_t VYbottom = std::min(VYSmallY[nBlkXP * (nBlkY - 1) + i], (int16_t)0);
             for (int dy = nBlkY; dy < nBlkYP; dy++) {
                 VXSmallY[nBlkXP * dy + i] = VXbottom;
                 VYSmallY[nBlkXP * dy + i] = VYbottom;
@@ -60,7 +55,7 @@ void CheckAndPadSmallY(int16_t *VXSmallY, int16_t *VYSmallY, int nBlkXP, int nBl
 }
 
 
-void CheckAndPadMaskSmall(uint8_t *MaskSmall, int nBlkXP, int nBlkYP, int nBlkX, int nBlkY) {
+void CheckAndPadMaskSmall(uint8_t * VS_RESTRICT MaskSmall, int nBlkXP, int nBlkYP, int nBlkX, int nBlkY) {
     if (nBlkXP > nBlkX) { // fill right
         for (int j = 0; j < nBlkY; j++) {
             uint8_t right = MaskSmall[j * nBlkXP + nBlkX - 1];
@@ -82,20 +77,19 @@ void CheckAndPadMaskSmall(uint8_t *MaskSmall, int nBlkXP, int nBlkYP, int nBlkX,
 }
 
 
-static inline void ByteOccMask(uint8_t *occMask, int occlusion, double occnorm, double fGamma) {
+static inline void ByteOccMask(uint8_t * VS_RESTRICT occMask, int occlusion, double occnorm, double fGamma) {
     if (fGamma == 1.0)
-        *occMask = max(*occMask, min((int)(255 * occlusion * occnorm), 255));
+        *occMask = std::max(*occMask, std::min((int)(255 * occlusion * occnorm), 255));
     else
-        *occMask = max(*occMask, min((int)(255 * pow(occlusion * occnorm, fGamma)), 255));
+        *occMask = std::max(*occMask, std::min((int)(255 * pow(occlusion * occnorm, fGamma)), 255));
 }
 
-void MakeVectorOcclusionMaskTime(const FakeGroupOfPlanes *fgop, int isBackward, int nBlkX, int nBlkY, double dMaskNormDivider, double fGamma, int nPel, uint8_t *occMask, int occMaskPitch, int time256, int nBlkStepX, int nBlkStepY) { // analyse vectors field to detect occlusion
+void MakeVectorOcclusionMaskTime(const FakeGroupOfPlanes *fgop, int isBackward, int nBlkX, int nBlkY, double dMaskNormDivider, double fGamma, int nPel, uint8_t * VS_RESTRICT occMask, ptrdiff_t occMaskPitch, int time256, int nBlkStepX, int nBlkStepY) { // analyse vectors field to detect occlusion
     memset(occMask, 0, occMaskPitch * nBlkY);
     int time4096X = time256 * 16 / (nBlkStepX * nPel);
     int time4096Y = time256 * 16 / (nBlkStepY * nPel);
     double occnormX = 80.0 / (dMaskNormDivider * nBlkStepX * nPel);
     double occnormY = 80.0 / (dMaskNormDivider * nBlkStepY * nPel);
-    int occlusion;
 
     for (int by = 0; by < nBlkY; by++) {
         for (int bx = 0; bx < nBlkX; bx++) {
@@ -108,9 +102,9 @@ void MakeVectorOcclusionMaskTime(const FakeGroupOfPlanes *fgop, int isBackward, 
                 const FakeBlockData *block1 = fgopGetBlock(fgop, 0, i1);
                 int vx1 = block1->vector.x;
                 if (vx1 < vx) {
-                    occlusion = vx - vx1;
-                    int minb = isBackward ? max(0, bx + 1 - occlusion * time4096X / 4096) : bx;
-                    int maxb = isBackward ? bx + 1 : min(bx + 1 - occlusion * time4096X / 4096, nBlkX - 1);
+                    int occlusion = vx - vx1;
+                    int minb = isBackward ? std::max(0, bx + 1 - occlusion * time4096X / 4096) : bx;
+                    int maxb = isBackward ? bx + 1 : std::min(bx + 1 - occlusion * time4096X / 4096, nBlkX - 1);
                     for (int bxi = minb; bxi <= maxb; bxi++)
                         ByteOccMask(&occMask[bxi + by * occMaskPitch], occlusion, occnormX, fGamma);
                 }
@@ -120,9 +114,9 @@ void MakeVectorOcclusionMaskTime(const FakeGroupOfPlanes *fgop, int isBackward, 
                 const FakeBlockData *block1 = fgopGetBlock(fgop, 0, i1);
                 int vy1 = block1->vector.y;
                 if (vy1 < vy) {
-                    occlusion = vy - vy1;
-                    int minb = isBackward ? max(0, by + 1 - occlusion * time4096Y / 4096) : by;
-                    int maxb = isBackward ? by + 1 : min(by + 1 - occlusion * time4096Y / 4096, nBlkY - 1);
+                    int occlusion = vy - vy1;
+                    int minb = isBackward ? std::max(0, by + 1 - occlusion * time4096Y / 4096) : by;
+                    int maxb = isBackward ? by + 1 : std::min(by + 1 - occlusion * time4096Y / 4096, nBlkY - 1);
                     for (int byi = minb; byi <= maxb; byi++)
                         ByteOccMask(&occMask[bx + byi * occMaskPitch], occlusion, occnormY, fGamma);
                 }
@@ -139,7 +133,7 @@ static unsigned char ByteNorm(int64_t sad, double dSADNormFactor, double fGamma)
 }
 
 
-void MakeSADMaskTime(const FakeGroupOfPlanes *fgop, int nBlkX, int nBlkY, double dSADNormFactor, double fGamma, int nPel, uint8_t *Mask, int MaskPitch, int time256, int nBlkStepX, int nBlkStepY, int bitsPerSample) {
+void MakeSADMaskTime(const FakeGroupOfPlanes *fgop, int nBlkX, int nBlkY, double dSADNormFactor, double fGamma, int nPel, uint8_t * VS_RESTICT Mask, ptrdiff_t MaskPitch, int time256, int nBlkStepX, int nBlkStepY, int bitsPerSample) {
     // Make approximate SAD mask at intermediate time
     //    double dSADNormFactor = 4 / (dMaskNormDivider*nBlkSizeX*nBlkSizeY);
     memset(Mask, 0, nBlkY * MaskPitch);
@@ -165,8 +159,8 @@ void MakeSADMaskTime(const FakeGroupOfPlanes *fgop, int nBlkX, int nBlkY, double
     }
 }
 
-
-void MakeVectorSmallMasks(const FakeGroupOfPlanes *fgop, int nBlkX, int nBlkY, int16_t *VXSmallY, int pitchVXSmallY, int16_t *VYSmallY, int pitchVYSmallY) {
+// Note about restrict: it appears that this function is always called with memory allocated from different malloc calls
+void MakeVectorSmallMasks(const FakeGroupOfPlanes *fgop, int nBlkX, int nBlkY, int16_t * VS_RESTICT VXSmallY, int pitchVXSmallY, int16_t * VS_RESTICT VYSmallY, int pitchVYSmallY) {
     // make  vector vx and vy small masks
     for (int by = 0; by < nBlkY; by++) {
         for (int bx = 0; bx < nBlkX; bx++) {
@@ -180,7 +174,7 @@ void MakeVectorSmallMasks(const FakeGroupOfPlanes *fgop, int nBlkX, int nBlkY, i
     }
 }
 
-void VectorSmallMaskYToHalfUV(int16_t *VSmallY, int nBlkX, int nBlkY, int16_t *VSmallUV, int ratioUV) {
+void VectorSmallMaskYToHalfUV(int16_t * VS_RESTICT VSmallY, int nBlkX, int nBlkY, int16_t *VS_RESTICT VSmallUV, int ratioUV) {
     if (ratioUV == 2) {
         // YV12 colorformat
         for (int by = 0; by < nBlkY; by++) {
@@ -205,8 +199,8 @@ void VectorSmallMaskYToHalfUV(int16_t *VSmallY, int nBlkX, int nBlkY, int16_t *V
 
 // copy refined planes to big one plane
 template <typename PixelType>
-static void RealMerge4PlanesToBig(uint8_t *pel2Plane_u8, int pel2Pitch, const uint8_t *pPlane0_u8, const uint8_t *pPlane1_u8,
-                           const uint8_t *pPlane2_u8, const uint8_t *pPlane3_u8, int width, int height, int pitch) {
+static void RealMerge4PlanesToBig(uint8_t *pel2Plane_u8, ptrdiff_t pel2Pitch, const uint8_t *pPlane0_u8, const uint8_t *pPlane1_u8,
+                           const uint8_t *pPlane2_u8, const uint8_t *pPlane3_u8, int width, int height, ptrdiff_t pitch) {
     for (int h = 0; h < height; h++) {
         for (int w = 0; w < width; w++) {
             PixelType *pel2Plane = (PixelType *)pel2Plane_u8;
@@ -234,7 +228,7 @@ static void RealMerge4PlanesToBig(uint8_t *pel2Plane_u8, int pel2Pitch, const ui
 }
 
 
-void Merge4PlanesToBig(uint8_t *pel2Plane, int pel2Pitch, const uint8_t *pPlane0, const uint8_t *pPlane1, const uint8_t *pPlane2, const uint8_t *pPlane3, int width, int height, int pitch, int bitsPerSample) {
+void Merge4PlanesToBig(uint8_t *pel2Plane, ptrdiff_t pel2Pitch, const uint8_t *pPlane0, const uint8_t *pPlane1, const uint8_t *pPlane2, const uint8_t *pPlane3, int width, int height, ptrdiff_t pitch, int bitsPerSample) {
     if (bitsPerSample == 8)
         RealMerge4PlanesToBig<uint8_t>(pel2Plane, pel2Pitch, pPlane0, pPlane1, pPlane2, pPlane3, width, height, pitch);
     else
@@ -244,12 +238,12 @@ void Merge4PlanesToBig(uint8_t *pel2Plane, int pel2Pitch, const uint8_t *pPlane0
 
 // copy refined planes to big one plane
 template <typename PixelType>
-static void RealMerge16PlanesToBig(uint8_t *pel4Plane_u8, int pel4Pitch,
-                            const uint8_t *pPlane0_u8, const uint8_t *pPlane1_u8, const uint8_t *pPlane2_u8, const uint8_t *pPlane3_u8,
-                            const uint8_t *pPlane4_u8, const uint8_t *pPlane5_u8, const uint8_t *pPlane6_u8, const uint8_t *pPlane7_u8,
-                            const uint8_t *pPlane8_u8, const uint8_t *pPlane9_u8, const uint8_t *pPlane10_u8, const uint8_t *pPlane11_u8,
-                            const uint8_t *pPlane12_u8, const uint8_t *pPlane13_u8, const uint8_t *pPlane14_u8, const uint8_t *pPlane15_u8,
-                            int width, int height, int pitch) {
+static void RealMerge16PlanesToBig(uint8_t * VS_RESTRICT pel4Plane_u8, ptrdiff_t pel4Pitch,
+                            const uint8_t * VS_RESTRICT pPlane0_u8, const uint8_t * VS_RESTRICT pPlane1_u8, const uint8_t * VS_RESTRICT pPlane2_u8, const uint8_t * VS_RESTRICT pPlane3_u8,
+                            const uint8_t * VS_RESTRICT pPlane4_u8, const uint8_t * VS_RESTRICT pPlane5_u8, const uint8_t * VS_RESTRICT pPlane6_u8, const uint8_t * VS_RESTRICT pPlane7_u8,
+                            const uint8_t * VS_RESTRICT pPlane8_u8, const uint8_t * VS_RESTRICT pPlane9_u8, const uint8_t * VS_RESTRICT pPlane10_u8, const uint8_t * VS_RESTRICT pPlane11_u8,
+                            const uint8_t * VS_RESTRICT pPlane12_u8, const uint8_t * VS_RESTRICT pPlane13_u8, const uint8_t * VS_RESTRICT pPlane14_u8, const uint8_t * VS_RESTRICT pPlane15_u8,
+                            int width, int height, ptrdiff_t pitch) {
     for (int h = 0; h < height; h++) {
         for (int w = 0; w < width; w++) {
             PixelType *pel4Plane = (PixelType *)pel4Plane_u8;
@@ -323,12 +317,12 @@ static void RealMerge16PlanesToBig(uint8_t *pel4Plane_u8, int pel4Pitch,
 }
 
 
-void Merge16PlanesToBig(uint8_t *pel4Plane, int pel4Pitch,
+void Merge16PlanesToBig(uint8_t *pel4Plane, ptrdiff_t pel4Pitch,
                         const uint8_t *pPlane0, const uint8_t *pPlane1, const uint8_t *pPlane2, const uint8_t *pPlane3,
                         const uint8_t *pPlane4, const uint8_t *pPlane5, const uint8_t *pPlane6, const uint8_t *pPlane7,
                         const uint8_t *pPlane8, const uint8_t *pPlane9, const uint8_t *pPlane10, const uint8_t *pPlane11,
                         const uint8_t *pPlane12, const uint8_t *pPlane13, const uint8_t *pPlane14, const uint8_t *pPlane15,
-                        int width, int height, int pitch, int bitsPerSample) {
+                        int width, int height, ptrdiff_t pitch, int bitsPerSample) {
     if (bitsPerSample == 8)
         RealMerge16PlanesToBig<uint8_t>(pel4Plane, pel4Pitch, pPlane0, pPlane1, pPlane2, pPlane3, pPlane4, pPlane5, pPlane6, pPlane7, pPlane8, pPlane9, pPlane10, pPlane11, pPlane12, pPlane13, pPlane14, pPlane15, width, height, pitch);
     else
@@ -336,17 +330,9 @@ void Merge16PlanesToBig(uint8_t *pel4Plane, int pel4Pitch,
 }
 
 
-//-----------------------------------------------------------
-uint8_t SADToMask(unsigned int sad, unsigned int sadnorm1024) {
-    // sadnorm1024 = 255 * (4*1024)/(mlSAD*nBlkSize*nBlkSize*chromablockfactor)
-    unsigned int l = sadnorm1024 * sad / 1024;
-    return (uint8_t)((l > 255) ? 255 : l);
-}
-
-
 // time-weihted blend src with ref frames (used for interpolation for poor motion estimation)
 template <typename PixelType>
-static void RealBlend(uint8_t *pdst, const uint8_t *psrc, const uint8_t *pref, int height, int width, int dst_pitch, int src_pitch, int ref_pitch, int time256) {
+static void RealBlend(uint8_t * VS_RESTRICT pdst, const uint8_t * VS_RESTRICT psrc, const uint8_t * VS_RESTRICT pref, int height, int width, ptrdiff_t dst_pitch, ptrdiff_t src_pitch, ptrdiff_t ref_pitch, int time256) {
     int h, w;
     for (h = 0; h < height; h++) {
         for (w = 0; w < width; w++) {
@@ -363,7 +349,7 @@ static void RealBlend(uint8_t *pdst, const uint8_t *psrc, const uint8_t *pref, i
 }
 
 
-void Blend(uint8_t *pdst, const uint8_t *psrc, const uint8_t *pref, int height, int width, int dst_pitch, int src_pitch, int ref_pitch, int time256, int bitsPerSample) {
+void Blend(uint8_t *pdst, const uint8_t *psrc, const uint8_t *pref, int height, int width, ptrdiff_t dst_pitch, ptrdiff_t src_pitch, ptrdiff_t ref_pitch, int time256, int bitsPerSample) {
     if (bitsPerSample == 8)
         RealBlend<uint8_t>(pdst, psrc, pref, height, width, dst_pitch, src_pitch, ref_pitch, time256);
     else
@@ -373,11 +359,11 @@ void Blend(uint8_t *pdst, const uint8_t *psrc, const uint8_t *pref, int height, 
 
 template <typename PixelType>
 static void FlowInter(
-        uint8_t *pdst8, int dst_pitch,
-        const uint8_t *prefB8, const uint8_t *prefF8, int ref_pitch,
+        uint8_t * VS_RESTRICT pdst8, ptrdiff_t dst_pitch,
+        const uint8_t *prefB8, const uint8_t *prefF8, ptrdiff_t ref_pitch,
         const int16_t *VXFullB, const int16_t *VXFullF,
         const int16_t *VYFullB, const int16_t *VYFullF,
-        const uint8_t *MaskB, const uint8_t *MaskF, int VPitch,
+        const uint8_t *MaskB, const uint8_t *MaskF, ptrdiff_t VPitch,
         int width, int height,
         int time256, int nPel) {
 
@@ -400,9 +386,9 @@ static void FlowInter(
             int vyB = (VYFullB[w] * (256 - time256)) >> 8;
             int64_t dstB = prefB[vyB * ref_pitch + vxB + (w << nPelLog)];
             int dstB0 = prefB[(w << nPelLog)]; /* zero */
-            pdst[w] = (PixelType)((((dstF * (255 - MaskF[w]) + ((MaskF[w] * (dstB * (255 - MaskB[w]) + MaskB[w] * dstF0) + 255) >> 8) + 255) >> 8) * (256 - time256) +
-                                 ((dstB * (255 - MaskB[w]) + ((MaskB[w] * (dstF * (255 - MaskF[w]) + MaskF[w] * dstB0) + 255) >> 8) + 255) >> 8) * time256) >>
-                      8);
+            pdst[w] = (PixelType)((((dstF * (256 - MaskF[w]) + ((MaskF[w] * (dstB * (256 - MaskB[w]) + MaskB[w] * dstF0) + 256) >> 8) + 256) >> 8) * (256 - time256) +
+                ((dstB * (256 - MaskB[w]) + ((MaskB[w] * (dstF * (256 - MaskF[w]) + MaskF[w] * dstB0) + 256) >> 8) + 256) >> 8) * time256) >>
+                8) - 1;
         }
         pdst += dst_pitch;
         prefB += ref_pitch << nPelLog;
@@ -419,11 +405,11 @@ static void FlowInter(
 
 template <typename PixelType>
 static void FlowInterExtra(
-        uint8_t *pdst8, int dst_pitch,
-        const uint8_t *prefB8, const uint8_t *prefF8, int ref_pitch,
+        uint8_t * VS_RESTRICT pdst8, ptrdiff_t dst_pitch,
+        const uint8_t *prefB8, const uint8_t *prefF8, ptrdiff_t ref_pitch,
         const int16_t *VXFullB, const int16_t *VXFullF,
         const int16_t *VYFullB, const int16_t *VYFullF,
-        const uint8_t *MaskB, const uint8_t *MaskF, int VPitch,
+        const uint8_t *MaskB, const uint8_t *MaskF, ptrdiff_t VPitch,
         int width, int height,
         int time256, int nPel,
         const int16_t *VXFullBB, const int16_t *VXFullFF,
@@ -447,29 +433,26 @@ static void FlowInterExtra(
 
             int vxFF = (VXFullFF[w] * time256) >> 8;
             int vyFF = (VYFullFF[w] * time256) >> 8;
-            int adrFF = vyFF * ref_pitch + vxFF + (w << nPelLog);
-            int dstFF = prefF[adrFF];
+            int dstFF = prefF[vyFF * ref_pitch + vxFF + (w << nPelLog)];
 
             int vxB = (VXFullB[w] * (256 - time256)) >> 8;
             int vyB = (VYFullB[w] * (256 - time256)) >> 8;
-            int adrB = vyB * ref_pitch + vxB + (w << nPelLog);
-            int dstB = prefB[adrB];
+            int dstB = prefB[vyB * ref_pitch + vxB + (w << nPelLog)];
 
             int vxBB = (VXFullBB[w] * (256 - time256)) >> 8;
             int vyBB = (VYFullBB[w] * (256 - time256)) >> 8;
-            int adrBB = vyBB * ref_pitch + vxBB + (w << nPelLog);
-            int dstBB = prefB[adrBB];
+            int dstBB = prefB[vyBB * ref_pitch + vxBB + (w << nPelLog)];
 
             /* use median, firsly get min max of compensations */
-            int minfb = min(dstB, dstF);
-            int maxfb = max(dstB, dstF);
+            int minfb = std::min(dstB, dstF);
+            int maxfb = std::max(dstB, dstF);
 
-            int medianBB = max(minfb, min(dstBB, maxfb));
-            int medianFF = max(minfb, min(dstFF, maxfb));
+            int medianBB = std::max(minfb, std::min(dstBB, maxfb));
+            int medianFF = std::max(minfb, std::min(dstFF, maxfb));
 
-            pdst[w] = (((medianBB * MaskF[w] + dstF * (255 - MaskF[w]) + 255) >> 8) * (256 - time256) +
-                       ((medianFF * MaskB[w] + dstB * (255 - MaskB[w]) + 255) >> 8) * time256) >>
-                      8;
+            pdst[w] = ((((medianBB * MaskF[w] + dstF * (256 - MaskF[w]) + 256) >> 8) * (256 - time256) +
+                ((medianFF * MaskB[w] + dstB * (256 - MaskB[w]) + 256) >> 8) * time256) >>
+                8) - 1;
         }
         pdst += dst_pitch;
         prefB += ref_pitch << nPelLog;
@@ -490,11 +473,11 @@ static void FlowInterExtra(
 
 template <typename PixelType>
 static void FlowInterSimple(
-        uint8_t *pdst8, int dst_pitch,
-        const uint8_t *prefB8, const uint8_t *prefF8, int ref_pitch,
+        uint8_t * VS_RESTRICT pdst8, ptrdiff_t dst_pitch,
+        const uint8_t *prefB8, const uint8_t *prefF8, ptrdiff_t ref_pitch,
         const int16_t *VXFullB, const int16_t *VXFullF,
         const int16_t *VYFullB, const int16_t *VYFullF,
-        const uint8_t *MaskB, const uint8_t *MaskF, int VPitch,
+        const uint8_t *MaskB, const uint8_t *MaskF, ptrdiff_t VPitch,
         int width, int height,
         int time256, int nPel) {
 
@@ -565,9 +548,4 @@ void selectFlowInterFunctions(FlowInterSimpleFunction *simple, FlowInterFunction
         *regular = FlowInter<uint16_t>;
         *extra = FlowInterExtra<uint16_t>;
     }
-
-#if defined(MVTOOLS_X86)
-    if (opt && (g_cpuinfo & X264_CPU_AVX2))
-        selectFlowInterFunctions_AVX2(simple, regular, extra, bitsPerSample);
-#endif
 }

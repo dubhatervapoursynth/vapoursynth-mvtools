@@ -38,7 +38,6 @@ if host_machine.cpu_family() == 'x86_64'
 
     libs += static_library('avx2',
         files(
-            'src/MaskFun_AVX2.cpp',
             'src/MVDegrains_AVX2.cpp',
             'src/MVFrame_AVX2.cpp',
             'src/Overlap_AVX2.cpp',
