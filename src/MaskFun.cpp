@@ -18,9 +18,7 @@
 // http://www.gnu.org/copyleft/gpl.html .
 
 #include <math.h>
-#include <stdint.h>
 #include <string.h>
-#include <stddef.h>
 #include <algorithm>
 #include <VSHelper4.h>
 
@@ -161,7 +159,7 @@ void MakeSADMaskTime(const FakeGroupOfPlanes *fgop, int nBlkX, int nBlkY, double
 }
 
 // Note about restrict: it appears that this function is always called with memory allocated from different malloc calls
-void MakeVectorSmallMasks(const FakeGroupOfPlanes *fgop, int nBlkX, int nBlkY, int16_t * VS_RESTRICT VXSmallY, int pitchVXSmallY, int16_t * VS_RESTRICT VYSmallY, int pitchVYSmallY) {
+void MakeVectorSmallMasks(const FakeGroupOfPlanes *fgop, int nBlkX, int nBlkY, int16_t * VS_RESTRICT VXSmallY, ptrdiff_t pitchVXSmallY, int16_t * VS_RESTRICT VYSmallY, ptrdiff_t pitchVYSmallY) {
     // make  vector vx and vy small masks
     for (int by = 0; by < nBlkY; by++) {
         for (int bx = 0; bx < nBlkX; bx++) {

@@ -25,6 +25,7 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+#include <stddef.h>
 
 #include "Fakery.h"
 #include "MVFrame.h"
@@ -33,50 +34,50 @@ void CheckAndPadSmallY(int16_t *VXSmallY, int16_t *VYSmallY, int nBlkXP, int nBl
 
 void CheckAndPadMaskSmall(uint8_t *MaskSmall, int nBlkXP, int nBlkYP, int nBlkX, int nBlkY);
 
-void MakeVectorOcclusionMaskTime(const FakeGroupOfPlanes *fgop, int isBackward, int nBlkX, int nBlkY, double dMaskNormDivider, double fGamma, int nPel, uint8_t *occMask, int occMaskPitch, int time256, int nBlkStepX, int nBlkStepY);
+void MakeVectorOcclusionMaskTime(const FakeGroupOfPlanes *fgop, int isBackward, int nBlkX, int nBlkY, double dMaskNormDivider, double fGamma, int nPel, uint8_t *occMask, ptrdiff_t occMaskPitch, int time256, int nBlkStepX, int nBlkStepY);
 
-void MakeSADMaskTime(const FakeGroupOfPlanes *fgop, int nBlkX, int nBlkY, double dSADNormFactor, double fGamma, int nPel, uint8_t *Mask, int MaskPitch, int time256, int nBlkStepX, int nBlkStepY, int bitsPerSample);
+void MakeSADMaskTime(const FakeGroupOfPlanes *fgop, int nBlkX, int nBlkY, double dSADNormFactor, double fGamma, int nPel, uint8_t *Mask, ptrdiff_t MaskPitch, int time256, int nBlkStepX, int nBlkStepY, int bitsPerSample);
 
-void MakeVectorSmallMasks(const FakeGroupOfPlanes *fgop, int nX, int nY, int16_t *VXSmallY, int pitchVXSmallY, int16_t *VYSmallY, int pitchVYSmallY);
+void MakeVectorSmallMasks(const FakeGroupOfPlanes *fgop, int nX, int nY, int16_t *VXSmallY, ptrdiff_t pitchVXSmallY, int16_t *VYSmallY, ptrdiff_t pitchVYSmallY);
 void VectorSmallMaskYToHalfUV(int16_t *VSmallY, int nBlkX, int nBlkY, int16_t *VSmallUV, int ratioUV);
 
-void Merge4PlanesToBig(uint8_t *pel2Plane, int pel2Pitch, const uint8_t *pPlane0, const uint8_t *pPlane1,
-                       const uint8_t *pPlane2, const uint8_t *pPlane3, int width, int height, int pitch, int bitsPerSample);
+void Merge4PlanesToBig(uint8_t *pel2Plane, ptrdiff_t pel2Pitch, const uint8_t *pPlane0, const uint8_t *pPlane1,
+                       const uint8_t *pPlane2, const uint8_t *pPlane3, int width, int height, ptrdiff_t pitch, int bitsPerSample);
 
-void Merge16PlanesToBig(uint8_t *pel4Plane, int pel4Pitch,
+void Merge16PlanesToBig(uint8_t *pel4Plane, ptrdiff_t pel4Pitch,
                         const uint8_t *pPlane0, const uint8_t *pPlane1, const uint8_t *pPlane2, const uint8_t *pPlane3,
                         const uint8_t *pPlane4, const uint8_t *pPlane5, const uint8_t *pPlane6, const uint8_t *pPlane7,
                         const uint8_t *pPlane8, const uint8_t *pPlane9, const uint8_t *pPlane10, const uint8_t *pPlane11,
                         const uint8_t *pPlane12, const uint8_t *pPlane13, const uint8_t *pPlane14, const uint8_t *pPlane15,
-                        int width, int height, int pitch, int bitsPerSample);
+                        int width, int height, ptrdiff_t pitch, int bitsPerSample);
 
-void Blend(uint8_t *pdst, const uint8_t *psrc, const uint8_t *pref, int height, int width, int dst_pitch, int src_pitch, int ref_pitch, int time256, int bitsPerSample);
+void Blend(uint8_t *pdst, const uint8_t *psrc, const uint8_t *pref, int height, int width, ptrdiff_t dst_pitch, ptrdiff_t src_pitch, ptrdiff_t ref_pitch, int time256, int bitsPerSample);
 
 
 typedef void (*FlowInterSimpleFunction)(
-        uint8_t *pdst, int dst_pitch,
-        const uint8_t *prefB, const uint8_t *prefF, int ref_pitch,
+        uint8_t *pdst, ptrdiff_t dst_pitch,
+        const uint8_t *prefB, const uint8_t *prefF, ptrdiff_t ref_pitch,
         const int16_t *VXFullB, const int16_t *VXFullF,
         const int16_t *VYFullB, const int16_t *VYFullF,
-        const uint8_t *MaskB, const uint8_t *MaskF, int VPitch,
+        const uint8_t *MaskB, const uint8_t *MaskF, ptrdiff_t VPitch,
         int width, int height,
         int time256, int nPel);
 
 typedef void (*FlowInterFunction)(
-        uint8_t *pdst, int dst_pitch,
-        const uint8_t *prefB, const uint8_t *prefF, int ref_pitch,
+        uint8_t *pdst, ptrdiff_t dst_pitch,
+        const uint8_t *prefB, const uint8_t *prefF, ptrdiff_t ref_pitch,
         const int16_t *VXFullB, const int16_t *VXFullF,
         const int16_t *VYFullB, const int16_t *VYFullF,
-        const uint8_t *MaskB, const uint8_t *MaskF, int VPitch,
+        const uint8_t *MaskB, const uint8_t *MaskF, ptrdiff_t VPitch,
         int width, int height,
         int time256, int nPel);
 
 typedef void (*FlowInterExtraFunction)(
-        uint8_t *pdst, int dst_pitch,
-        const uint8_t *prefB, const uint8_t *prefF, int ref_pitch,
+        uint8_t *pdst, ptrdiff_t dst_pitch,
+        const uint8_t *prefB, const uint8_t *prefF, ptrdiff_t ref_pitch,
         const int16_t *VXFullB, const int16_t *VXFullF,
         const int16_t *VYFullB, const int16_t *VYFullF,
-        const uint8_t *MaskB, const uint8_t *MaskF, int VPitch,
+        const uint8_t *MaskB, const uint8_t *MaskF, ptrdiff_t VPitch,
         int width, int height,
         int time256, int nPel,
         const int16_t *VXFullBB, const int16_t *VXFullFF,
