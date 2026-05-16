@@ -22,6 +22,7 @@
 #include <string.h>
 #include <stddef.h>
 #include <algorithm>
+#include <VSHelper4.h>
 
 #include "CommonFunctions.h"
 #include "CPU.h"
@@ -30,7 +31,7 @@
 
 
 // Note on restrict: this function appears to always be fed memory from separate malloc calls
-void CheckAndPadSmallY(int16_t *VS_RESTRICT VXSmallY, int16_t * VS_RESTRICT VYSmallY, int nBlkXP, int nBlkYP, int nBlkX, int nBlkY) {
+void CheckAndPadSmallY(int16_t * VS_RESTRICT VXSmallY, int16_t * VS_RESTRICT VYSmallY, int nBlkXP, int nBlkYP, int nBlkX, int nBlkY) {
     if (nBlkXP > nBlkX) { // fill right
         for (int j = 0; j < nBlkY; j++) {
             int16_t VXright = std::min(VXSmallY[j * nBlkXP + nBlkX - 1], (int16_t)0); // not positive
