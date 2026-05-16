@@ -86,8 +86,8 @@ static const VSFrame *VS_CC mvmaskGetFrame(int n, int activationReason, void *in
 
         const uint8_t *pSrc[3];
         uint8_t *pDst[3];
-        int nDstPitches[3];
-        int nSrcPitches[3];
+        ptrdiff_t nDstPitches[3];
+        ptrdiff_t nSrcPitches[3];
 
         pSrc[0] = vsapi->getReadPtr(src, 0);
         nSrcPitches[0] = vsapi->getStride(src, 0);

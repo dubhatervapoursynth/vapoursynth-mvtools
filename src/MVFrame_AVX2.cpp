@@ -78,8 +78,8 @@ void VerticalWiener_avx2(uint8_t * VS_RESTRICT pDst, const uint8_t *VS_RESTRICT 
         pDst += nPitch;
     }
 
-    for (int y = nHeight - 4; y < nHeight - 1; y++) {
-        for (int x = 0; x < nWidth; x += 32) {
+    for (intptr_t y = nHeight - 4; y < nHeight - 1; y++) {
+        for (intptr_t x = 0; x < nWidth; x += 32) {
             __m256i m0 = _mm256_loadu_si256((const __m256i *)&pSrc[x]);
             __m256i m1 = _mm256_loadu_si256((const __m256i *)&pSrc[x + nPitch]);
 
@@ -91,7 +91,7 @@ void VerticalWiener_avx2(uint8_t * VS_RESTRICT pDst, const uint8_t *VS_RESTRICT 
         pDst += nPitch;
     }
 
-    for (int x = 0; x < nWidth; x++)
+    for (intptr_t x = 0; x < nWidth; x++)
         pDst[x] = pSrc[x];
 }
 

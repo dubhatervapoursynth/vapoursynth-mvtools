@@ -55,9 +55,9 @@ static const VSFrame *VS_CC mvsuperGetFrame(int n, int activationReason, void *i
         const uint8_t *pSrc[3] = { NULL };
         uint8_t *pDst[3] = { NULL };
         const uint8_t *pSrcPel[3] = { NULL };
-        int nSrcPitch[3] = { 0 };
-        int nDstPitch[3] = { 0 };
-        int nSrcPelPitch[3] = { 0 };
+        ptrdiff_t nSrcPitch[3] = { 0 };
+        ptrdiff_t nDstPitch[3] = { 0 };
+        ptrdiff_t nSrcPelPitch[3] = { 0 };
 
         const VSFrame *srcPel = NULL;
         if (d->usePelClip)
@@ -255,7 +255,7 @@ static void VS_CC mvsuperCreate(const VSMap *in, VSMap *out, void *userData, VSC
     }
 
     d.nSuperWidth = d.nWidth + 2 * d.nHPad;
-    d.nSuperHeight = PlaneSuperOffset(0, d.nHeight, d.nLevels, d.nPel, d.nVPad, d.nSuperWidth, d.yRatioUV) / d.nSuperWidth;
+    d.nSuperHeight = (int)PlaneSuperOffset(0, d.nHeight, d.nLevels, d.nPel, d.nVPad, d.nSuperWidth, d.yRatioUV) / d.nSuperWidth;
     if (d.yRatioUV == 2 && d.nSuperHeight & 1)
         d.nSuperHeight++; // even
     if (d.xRatioUV == 2 && d.nSuperWidth & 1)

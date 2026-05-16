@@ -6,6 +6,7 @@
 
 #include "Fakery.h"
 #include "MVFrame.h"
+#include <VSHelper4.h>
 
 enum VectorOrder {
     Backward1 = 0,
@@ -23,13 +24,13 @@ enum VectorOrder {
 };
 
 
-typedef void (*DenoiseFunction)(uint8_t *pDst, int nDstPitch, const uint8_t *pSrc, int nSrcPitch, const uint8_t **_pRefs, const int *nRefPitches, int WSrc, const int *WRefs);
+typedef void (*DenoiseFunction)(uint8_t *pDst, ptrdiff_t nDstPitch, const uint8_t *pSrc, ptrdiff_t nSrcPitch, const uint8_t **_pRefs, const ptrdiff_t *nRefPitches, int WSrc, const int *WRefs);
 
 
 // XXX Moves the pointers passed in pRefs. This is okay because they are not
 // used after this function is done with them.
 template <int radius, int blockWidth, int blockHeight, typename PixelType>
-static void Degrain_C(uint8_t * __restrict pDst8, int nDstPitch, const uint8_t * __restrict pSrc8, int nSrcPitch, const uint8_t ** __restrict pRefs8, const int * __restrict nRefPitches, int WSrc, const int * __restrict WRefs) {
+static void Degrain_C(uint8_t * VS_RESTRICT pDst8, ptrdiff_t nDstPitch, const uint8_t * VS_RESTRICT pSrc8, ptrdiff_t nSrcPitch, const uint8_t ** VS_RESTRICT pRefs8, const ptrdiff_t * VS_RESTRICT nRefPitches, int WSrc, const int * VS_RESTRICT WRefs) {
     for (int y = 0; y < blockHeight; y++) {
         for (int x = 0; x < blockWidth; x++) {
             const PixelType *pSrc = (const PixelType * __restrict)pSrc8;
@@ -66,7 +67,7 @@ DenoiseFunction selectDegrainFunctionAVX2(unsigned radius, unsigned width, unsig
 // XXX Moves the pointers passed in pRefs. This is okay because they are not
 // used after this function is done with them.
 template <int radius, int blockWidth, int blockHeight>
-static void Degrain_sse2(uint8_t *pDst, int nDstPitch, const uint8_t *pSrc, int nSrcPitch, const uint8_t **pRefs, const int *nRefPitches, int WSrc, const int *WRefs) {
+static void Degrain_sse2(uint8_t * VS_RESTRICT pDst, ptrdiff_t nDstPitch, const uint8_t * VS_RESTRICT pSrc, ptrdiff_t nSrcPitch, const uint8_t ** VS_RESTRICT pRefs, const ptrdiff_t * VS_RESTRICT nRefPitches, int WSrc, const int * VS_RESTRICT WRefs) {
     static_assert(blockWidth >= 4, "");
 
     __m128i zero = _mm_setzero_si128();
@@ -189,7 +190,7 @@ static inline int DegrainWeight(int64_t thSAD, int64_t blockSAD) {
 }
 
 
-static inline void useBlock(const uint8_t *&p, int &np, int &WRef, int isUsable, const FakeGroupOfPlanes *fgop, int i, MVPlane * const *pPlane, const uint8_t **pSrcCur, int xx, const int *nSrcPitch, int nLogPel, int plane, int xSubUV, int ySubUV, const int64_t *thSAD) {
+static inline void useBlock(const uint8_t *&p, ptrdiff_t &np, int &WRef, int isUsable, const FakeGroupOfPlanes *fgop, int i, MVPlane * const *pPlane, const uint8_t **pSrcCur, int xx, const ptrdiff_t *nSrcPitch, int nLogPel, int plane, int xSubUV, int ySubUV, const int64_t *thSAD) {
     if (isUsable) {
         const FakeBlockData *block = fgopGetBlock(fgop, 0, i);
         int blx = (block->x << nLogPel) + block->vector.x;

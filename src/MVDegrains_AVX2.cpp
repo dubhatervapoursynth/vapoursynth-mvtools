@@ -53,7 +53,7 @@ enum InstructionSets {
 // XXX Moves the pointers passed in pRefs. This is okay because they are not
 // used after this function is done with them.
 template <int radius, int blockWidth, int blockHeight>
-static void Degrain_avx2(uint8_t *pDst, int nDstPitch, const uint8_t *pSrc, int nSrcPitch, const uint8_t **pRefs, const int *nRefPitches, int WSrc, const int *WRefs) {
+static void Degrain_avx2(uint8_t * VS_RESTRICT pDst, ptrdiff_t nDstPitch, const uint8_t * VS_RESTRICT pSrc, ptrdiff_t nSrcPitch, const uint8_t ** VS_RESTRICT pRefs, const ptrdiff_t * VS_RESTRICT nRefPitches, int WSrc, const int * VS_RESTRICT WRefs) {
     static_assert(blockWidth >= 16 || (blockWidth == 8 && blockHeight >= 2), "");
 
     __m256i zero = _mm256_setzero_si256();

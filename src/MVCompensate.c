@@ -103,10 +103,10 @@ static const VSFrame *VS_CC mvcompensateGetFrame(int n, int activationReason, vo
         uint8_t *pDst[3] = { NULL };
         uint8_t *pDstCur[3] = { NULL };
         const uint8_t *pRef[3] = { NULL };
-        int nDstPitches[3] = { 0 };
-        int nRefPitches[3] = { 0 };
+        ptrdiff_t nDstPitches[3] = { 0 };
+        ptrdiff_t nRefPitches[3] = { 0 };
         const uint8_t *pSrc[3] = { NULL };
-        int nSrcPitches[3] = { 0 };
+        ptrdiff_t nSrcPitches[3] = { 0 };
 
         const VSFrame *mvn = vsapi->getFrameFilter(n, d->vectors, frameCtx);
         FakeGroupOfPlanes fgop;
@@ -317,7 +317,7 @@ static const VSFrame *VS_CC mvcompensateGetFrame(int n, int activationReason, vo
             }
 
             const uint8_t **scSrc;
-            int *scPitches;
+            ptrdiff_t *scPitches;
 
             if (scBehavior) {
                 scSrc = pSrc;
@@ -357,7 +357,7 @@ static const VSFrame *VS_CC mvcompensateGetFrame(int n, int activationReason, vo
                 pSrc[plane] = vsapi->getReadPtr(src, plane);
                 nSrcPitches[plane] = vsapi->getStride(src, plane);
 
-                int nOffset = nHPadding[plane] * bytesPerSample + nVPadding[plane] * nSrcPitches[plane];
+                ptrdiff_t nOffset = nHPadding[plane] * bytesPerSample + nVPadding[plane] * nSrcPitches[plane];
 
                 vsh_bitblt(pDst[plane], nDstPitches[plane], pSrc[plane] + nOffset, nSrcPitches[plane], nWidth[plane] * bytesPerSample, nHeight[plane]);
             }
@@ -465,7 +465,7 @@ static void VS_CC mvcompensateCreate(const VSMap *in, VSMap *out, void *userData
 #define ERROR_SIZE 1024
     char errorMsg[ERROR_SIZE] = "Compensate: failed to retrieve first frame from super clip. Error message: ";
     size_t errorLen = strlen(errorMsg);
-    const VSFrame *evil = vsapi->getFrame(0, d.super, errorMsg + errorLen, ERROR_SIZE - errorLen);
+    const VSFrame *evil = vsapi->getFrame(0, d.super, errorMsg + errorLen, ERROR_SIZE - (int)errorLen);
 #undef ERROR_SIZE
     if (!evil) {
         vsapi->mapSetError(out, errorMsg);

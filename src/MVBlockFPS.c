@@ -114,9 +114,9 @@ MEDIAN(uint16_t)
 
 
 #define RealResultBlock(PixelType) \
-static void RealResultBlock_##PixelType(uint8_t *pDst, int dst_pitch, const uint8_t *pMCB, int MCB_pitch, const uint8_t *pMCF, int MCF_pitch, \
-                            const uint8_t *pRef, int ref_pitch, const uint8_t *pSrc, int src_pitch, uint8_t *maskB, int mask_pitch, uint8_t *maskF, \
-                            uint8_t *pOcc, int nBlkSizeX, int nBlkSizeY, int time256, int mode, int bitsPerSample) { \
+static void RealResultBlock_##PixelType(uint8_t * VS_RESTRICT pDst, ptrdiff_t dst_pitch, const uint8_t * pMCB, ptrdiff_t MCB_pitch, const uint8_t *pMCF, ptrdiff_t MCF_pitch, \
+                            const uint8_t *pRef, ptrdiff_t ref_pitch, const uint8_t *pSrc, ptrdiff_t src_pitch, const uint8_t *maskB, ptrdiff_t mask_pitch, const uint8_t *maskF, \
+                            const uint8_t *pOcc, int nBlkSizeX, int nBlkSizeY, int time256, int mode, int bitsPerSample) { \
     if (mode == 0) { \
         for (int h = 0; h < nBlkSizeY; h++) { \
             for (int w = 0; w < nBlkSizeX; w++) { \
@@ -227,9 +227,9 @@ RealResultBlock(uint8_t)
 RealResultBlock(uint16_t)
 
 
-static void ResultBlock(uint8_t *pDst, int dst_pitch, const uint8_t *pMCB, int MCB_pitch, const uint8_t *pMCF, int MCF_pitch,
-                        const uint8_t *pRef, int ref_pitch, const uint8_t *pSrc, int src_pitch, uint8_t *maskB, int mask_pitch, uint8_t *maskF,
-                        uint8_t *pOcc, int nBlkSizeX, int nBlkSizeY, int time256, int mode, int bitsPerSample) {
+static void ResultBlock(uint8_t *pDst, ptrdiff_t dst_pitch, const uint8_t *pMCB, ptrdiff_t MCB_pitch, const uint8_t *pMCF, ptrdiff_t MCF_pitch,
+                        const uint8_t *pRef, ptrdiff_t ref_pitch, const uint8_t *pSrc, ptrdiff_t src_pitch, const uint8_t *maskB, ptrdiff_t mask_pitch, const uint8_t *maskF,
+                        const uint8_t *pOcc, int nBlkSizeX, int nBlkSizeY, int time256, int mode, int bitsPerSample) {
     if (bitsPerSample == 8)
         RealResultBlock_uint8_t(pDst, dst_pitch, pMCB, MCB_pitch, pMCF, MCF_pitch, pRef, ref_pitch, pSrc, src_pitch, maskB, mask_pitch, maskF, pOcc, nBlkSizeX, nBlkSizeY, time256, mode, bitsPerSample);
     else
@@ -357,9 +357,9 @@ static const VSFrame *VS_CC mvblockfpsGetFrame(int n, int activationReason, void
             uint8_t *pDst[3] = { NULL };
             const uint8_t *pRef[3] = { NULL };
             const uint8_t *pSrc[3] = { NULL };
-            int nDstPitches[3] = { 0 };
-            int nRefPitches[3] = { 0 };
-            int nSrcPitches[3] = { 0 };
+            ptrdiff_t nDstPitches[3] = { 0 };
+            ptrdiff_t nRefPitches[3] = { 0 };
+            ptrdiff_t nSrcPitches[3] = { 0 };
 
             // If both are usable, that means both nleft and nright are less than oldvi->numFrames. Thus there is no need to check nleft and nright here.
             const VSFrame *src = vsapi->getFrameFilter(nleft, d->super, frameCtx);
@@ -642,7 +642,7 @@ static const VSFrame *VS_CC mvblockfpsGetFrame(int n, int activationReason, void
             if (blend) { //let's blend src with ref frames like ConvertFPS
                 uint8_t *pDst[3];
                 const uint8_t *pRef[3], *pSrc[3];
-                int nDstPitches[3], nRefPitches[3], nSrcPitches[3];
+                ptrdiff_t nDstPitches[3], nRefPitches[3], nSrcPitches[3];
 
                 const VSFrame *ref = vsapi->getFrameFilter(VSMIN(nright, d->oldvi->numFrames - 1), d->node, frameCtx);
 
@@ -787,7 +787,7 @@ static void VS_CC mvblockfpsCreate(const VSMap *in, VSMap *out, void *userData, 
 #define ERROR_SIZE 1024
     char errorMsg[ERROR_SIZE] = "BlockFPS: failed to retrieve first frame from super clip. Error message: ";
     size_t errorLen = strlen(errorMsg);
-    const VSFrame *evil = vsapi->getFrame(0, d.super, errorMsg + errorLen, ERROR_SIZE - errorLen);
+    const VSFrame *evil = vsapi->getFrame(0, d.super, errorMsg + errorLen, ERROR_SIZE - (int)errorLen);
 #undef ERROR_SIZE
     if (!evil) {
         vsapi->mapSetError(out, errorMsg);

@@ -31,7 +31,7 @@ extern "C" {
 
 typedef struct DCTFFTW DCTFFTW;
 
-typedef void (*Float2PixelsFunction)(const DCTFFTW *dct, uint8_t *dstp, int dst_pitch, float *realdata);
+typedef void (*Float2PixelsFunction)(const DCTFFTW *dct, uint8_t *dstp, ptrdiff_t dst_pitch, float *realdata);
 
 
 typedef struct DCTFFTW {
@@ -54,7 +54,7 @@ void dctInit(DCTFFTW *dct, int sizex, int sizey, int bitsPerSample, int opt);
 
 void dctDeinit(DCTFFTW *dct);
 
-void dctBytes2D(DCTFFTW *dct, const uint8_t *srcp, int src_pitch, uint8_t *dctp, int dct_pitch);
+void dctBytes2D(DCTFFTW *dct, const uint8_t *srcp, ptrdiff_t src_pitch, uint8_t *dctp, ptrdiff_t dct_pitch);
 
 #ifdef __cplusplus
 } // extern "C"

@@ -200,8 +200,8 @@ static const VSFrame *VS_CC mvflowfpsGetFrame(int n, int activationReason, void 
             uint8_t *pDst[3] = { NULL };
             const uint8_t *pRef[3] = { NULL };
             const uint8_t *pSrc[3] = { NULL };
-            int nDstPitches[3] = { 0 };
-            int nRefPitches[3] = { 0 };
+            ptrdiff_t nDstPitches[3] = { 0 };
+            ptrdiff_t nRefPitches[3] = { 0 };
 
             // Put this before any allocations so we don't have to free much in case of error.
             const VSMap *props = vsapi->getFramePropertiesRO(mvB);
@@ -347,8 +347,8 @@ static const VSFrame *VS_CC mvflowfpsGetFrame(int n, int activationReason, void 
                 vsapi->freeFrame(mvBB);
             }
 
-            int nOffsetY = nRefPitches[0] * nVPadding * nPel + nHPadding * bytesPerSample * nPel;
-            int nOffsetUV = nRefPitches[1] * nVPaddingUV * nPel + nHPaddingUV * bytesPerSample * nPel;
+            ptrdiff_t nOffsetY = nRefPitches[0] * nVPadding * nPel + nHPadding * bytesPerSample * nPel;
+            ptrdiff_t nOffsetUV = nRefPitches[1] * nVPaddingUV * nPel + nHPaddingUV * bytesPerSample * nPel;
 
             if (maskmode == 2 && isUsableB && isUsableF) { // slow method with extra frames
                 // get vector mask from extra frames
@@ -487,7 +487,7 @@ static const VSFrame *VS_CC mvflowfpsGetFrame(int n, int activationReason, void 
             if (blend) { //let's blend src with ref frames like ConvertFPS
                 uint8_t *pDst[3];
                 const uint8_t *pRef[3], *pSrc[3];
-                int nDstPitches[3], nRefPitches[3], nSrcPitches[3];
+                ptrdiff_t nDstPitches[3], nRefPitches[3], nSrcPitches[3];
 
                 const VSFrame *ref = vsapi->getFrameFilter(VSMIN(nright, d->oldvi->numFrames - 1), d->node, frameCtx);
 
@@ -618,7 +618,7 @@ static void VS_CC mvflowfpsCreate(const VSMap *in, VSMap *out, void *userData, V
 #define ERROR_SIZE 1024
     char errorMsg[ERROR_SIZE] = "FlowFPS: failed to retrieve first frame from super clip. Error message: ";
     size_t errorLen = strlen(errorMsg);
-    const VSFrame *evil = vsapi->getFrame(0, d.super, errorMsg + errorLen, ERROR_SIZE - errorLen);
+    const VSFrame *evil = vsapi->getFrame(0, d.super, errorMsg + errorLen, ERROR_SIZE - (int)errorLen);
 #undef ERROR_SIZE
     if (!evil) {
         vsapi->mapSetError(out, errorMsg);

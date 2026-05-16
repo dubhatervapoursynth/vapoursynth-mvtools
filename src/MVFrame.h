@@ -39,7 +39,7 @@ int PlaneHeightLuma(int src_height, int level, int yRatioUV, int vpad);
 
 int PlaneWidthLuma(int src_width, int level, int xRatioUV, int hpad);
 
-unsigned int PlaneSuperOffset(int chroma, int src_height, int level, int pel, int vpad, int plane_pitch, int yRatioUV);
+ptrdiff_t PlaneSuperOffset(int chroma, int src_height, int level, int pel, int vpad, ptrdiff_t plane_pitch, int yRatioUV);
 
 
 typedef struct MVPlane {
@@ -48,10 +48,10 @@ typedef struct MVPlane {
     int nHeight;
     int nPaddedWidth;
     int nPaddedHeight;
-    int nPitch;
+    ptrdiff_t nPitch;
     int nHPadding;
     int nVPadding;
-    int nOffsetPadding;
+    ptrdiff_t nOffsetPadding;
     int nHPaddingPel;
     int nVPaddingPel;
     int bitsPerSample;
@@ -72,15 +72,13 @@ void mvpDeinit(MVPlane *mvp);
 
 void mvpResetState(MVPlane *mvp);
 
-void mvpUpdate(MVPlane *mvp, uint8_t *pSrc, int _nPitch);
-
-void mvpFillPlane(MVPlane *mvp, const uint8_t *pNewPlane, int nNewPitch);
+void mvpFillPlane(MVPlane *mvp, const uint8_t *pNewPlane, ptrdiff_t nNewPitch);
 
 void mvpPad(MVPlane *mvp);
 
 void mvpRefine(MVPlane *mvp, int sharp);
 
-void mvpRefineExt(MVPlane *mvp, const uint8_t *pSrc2x, int nSrc2xPitch, int isExtPadded);
+void mvpRefineExt(MVPlane *mvp, const uint8_t *pSrc2x, ptrdiff_t nSrc2xPitch, int isExtPadded);
 
 void mvpReduceTo(MVPlane *mvp, MVPlane *pReducedPlane, int rfilter);
 
@@ -116,7 +114,7 @@ void mvfDeinit(MVFrame *mvf);
 
 void mvfUpdate(MVFrame *mvf, uint8_t **pSrc, int *pitch);
 
-void mvfFillPlane(MVFrame *mvf, const uint8_t *pNewPlane, int nNewPitch, int plane);
+void mvfFillPlane(MVFrame *mvf, const uint8_t *pNewPlane, ptrdiff_t nNewPitch, int plane);
 
 void mvfRefine(MVFrame *mvf, MVPlaneSet nMode, int sharp);
 
@@ -145,11 +143,11 @@ void mvgofInit(MVGroupOfFrames *mvgof, int nLevelCount, int nWidth, int nHeight,
 
 void mvgofDeinit(MVGroupOfFrames *mvgof);
 
-void mvgofUpdate(MVGroupOfFrames *mvgof, uint8_t **pSrc, int *pitch);
+void mvgofUpdate(MVGroupOfFrames *mvgof, uint8_t **pSrc, ptrdiff_t *pitch);
 
 MVFrame *mvgofGetFrame(MVGroupOfFrames *mvgof, int nLevel);
 
-void mvgofSetPlane(MVGroupOfFrames *mvgof, const uint8_t *pNewSrc, int nNewPitch, int plane);
+void mvgofSetPlane(MVGroupOfFrames *mvgof, const uint8_t *pNewSrc, ptrdiff_t nNewPitch, int plane);
 
 void mvgofRefine(MVGroupOfFrames *mvgof, MVPlaneSet nMode, int sharp);
 

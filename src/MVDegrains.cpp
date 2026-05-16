@@ -118,9 +118,9 @@ static const VSFrame *VS_CC mvdegrainGetFrame(int n, int activationReason, void 
         const uint8_t *pSrcCur[3] = { NULL };
         const uint8_t *pSrc[3] = { NULL };
         const uint8_t *pRefs[radius * 2][3] = { { NULL } };
-        int nDstPitches[3] = { 0 };
-        int nSrcPitches[3] = { 0 };
-        int nRefPitches[radius * 2][3] = { { 0 } };
+        ptrdiff_t nDstPitches[3] = { 0 };
+        ptrdiff_t nSrcPitches[3] = { 0 };
+        ptrdiff_t nRefPitches[radius * 2][3] = { { 0 } };
         int isUsable[radius * 2];
         int nLogPel = (d->vectors_data[0].nPel == 4) ? 2 : (d->vectors_data[0].nPel == 2) ? 1 : 0;
 
@@ -219,7 +219,7 @@ static const VSFrame *VS_CC mvdegrainGetFrame(int n, int activationReason, void 
                         int i = by * nBlkX + bx;
 
                         const uint8_t *pointers[radius * 2]; // Moved by the degrain function.
-                        int strides[radius * 2];
+                        ptrdiff_t strides[radius * 2];
 
                         int WSrc, WRefs[radius * 2];
 
@@ -263,7 +263,7 @@ static const VSFrame *VS_CC mvdegrainGetFrame(int n, int activationReason, void 
                         int i = by * nBlkX + bx;
 
                         const uint8_t *pointers[radius * 2]; // Moved by the degrain function.
-                        int strides[radius * 2];
+                        ptrdiff_t strides[radius * 2];
 
                         int WSrc, WRefs[radius * 2];
 

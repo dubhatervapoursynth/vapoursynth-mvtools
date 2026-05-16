@@ -41,9 +41,9 @@
 #include <emmintrin.h>
 
 
-void VerticalBilinear_avx2(uint8_t *pDst, const uint8_t *pSrc, intptr_t nPitch,
+void VerticalBilinear_avx2(uint8_t * VS_RESTRICT pDst, const uint8_t * VS_RESTRICT pSrc, intptr_t nPitch,
                            intptr_t nWidth, intptr_t nHeight, intptr_t bitsPerSample);
-void VerticalWiener_avx2(uint8_t *pDst, const uint8_t *pSrc, intptr_t nPitch,
+void VerticalWiener_avx2(uint8_t * VS_RESTRICT pDst, const uint8_t * VS_RESTRICT pSrc, intptr_t nPitch,
                          intptr_t nWidth, intptr_t nHeight, intptr_t bitsPerSample);
 
 #endif
@@ -334,8 +334,8 @@ static void VerticalWiener_sse2(uint8_t *pDst, const uint8_t *pSrc, intptr_t nPi
         pDst += nPitch;
     }
 
-    for (int y = nHeight - 4; y < nHeight - 1; y++) {
-        for (int x = 0; x < nWidth; x += 16) {
+    for (intptr_t y = nHeight - 4; y < nHeight - 1; y++) {
+        for (intptr_t x = 0; x < nWidth; x += 16) {
             __m128i m0 = _mm_loadu_si128((const __m128i *)&pSrc[x]);
             __m128i m1 = _mm_loadu_si128((const __m128i *)&pSrc[x + nPitch]);
 
@@ -347,7 +347,7 @@ static void VerticalWiener_sse2(uint8_t *pDst, const uint8_t *pSrc, intptr_t nPi
         pDst += nPitch;
     }
 
-    for (int x = 0; x < nWidth; x++)
+    for (intptr_t x = 0; x < nWidth; x++)
         pDst[x] = pSrc[x];
 }
 
@@ -423,8 +423,8 @@ static void DiagonalBilinear(uint8_t * VS_RESTRICT pDst8, const uint8_t * VS_RES
 
 
 template <typename PixelType>
-static void RB2F_C(uint8_t * VS_RESTRICT pDst8, const uint8_t * VS_RESTRICT pSrc8, int nDstPitch,
-                   int nSrcPitch, int nWidth, int nHeight, int opt) {
+static void RB2F_C(uint8_t * VS_RESTRICT pDst8, const uint8_t * VS_RESTRICT pSrc8, ptrdiff_t nDstPitch,
+                   ptrdiff_t nSrcPitch, int nWidth, int nHeight, int opt) {
     (void)opt;
 
     PixelType *pDst = (PixelType *)pDst8;
@@ -447,8 +447,8 @@ static void RB2F_C(uint8_t * VS_RESTRICT pDst8, const uint8_t * VS_RESTRICT pSrc
 //  Filtered with 1/4, 1/2, 1/4 filter for smoothing and anti-aliasing - Fizick
 // nHeight is dst height which is reduced by 2 source height
 template <typename PixelType>
-static void RB2FilteredVertical(uint8_t * VS_RESTRICT pDst8, const uint8_t * VS_RESTRICT pSrc8, int nDstPitch,
-                                int nSrcPitch, int nWidth, int nHeight, int opt) {
+static void RB2FilteredVertical(uint8_t * VS_RESTRICT pDst8, const uint8_t * VS_RESTRICT pSrc8, ptrdiff_t nDstPitch,
+                                ptrdiff_t nSrcPitch, int nWidth, int nHeight, int opt) {
     (void)opt;
 
     /* int nWidthMMX = (nWidth/4)*4; */
@@ -480,7 +480,7 @@ static void RB2FilteredVertical(uint8_t * VS_RESTRICT pDst8, const uint8_t * VS_
 // Filtered with 1/4, 1/2, 1/4 filter for smoothing and anti-aliasing - Fizick
 // nWidth is dst height which is reduced by 2 source width
 template <typename PixelType>
-static void RB2FilteredHorizontalInplace(uint8_t * VS_RESTRICT pSrc8, int nSrcPitch, int nWidth, int nHeight, int opt) {
+static void RB2FilteredHorizontalInplace(uint8_t * VS_RESTRICT pSrc8, ptrdiff_t nSrcPitch, int nWidth, int nHeight, int opt) {
     (void)opt;
 
     /* int nWidthMMX = 1 + ((nWidth-2)/4)*4; */
@@ -506,8 +506,8 @@ static void RB2FilteredHorizontalInplace(uint8_t * VS_RESTRICT pSrc8, int nSrcPi
 // separable Filtered with 1/4, 1/2, 1/4 filter for smoothing and anti-aliasing - Fizick v.2.5.2
 // assume he have enough horizontal dimension for intermediate results (double as final)
 template <typename PixelType>
-static void RB2Filtered(uint8_t *pDst, const uint8_t *pSrc, int nDstPitch,
-                        int nSrcPitch, int nWidth, int nHeight, int opt) {
+static void RB2Filtered(uint8_t *pDst, const uint8_t *pSrc, ptrdiff_t nDstPitch,
+                        ptrdiff_t nSrcPitch, int nWidth, int nHeight, int opt) {
     RB2FilteredVertical<PixelType>(pDst, pSrc, nDstPitch, nSrcPitch, nWidth * 2, nHeight, opt); /* intermediate half height */
     RB2FilteredHorizontalInplace<PixelType>(pDst, nDstPitch, nWidth, nHeight, opt);             /* inpace width reduction */
 }
@@ -516,8 +516,8 @@ static void RB2Filtered(uint8_t *pDst, const uint8_t *pSrc, int nDstPitch,
 //  BilinearFiltered with 1/8, 3/8, 3/8, 1/8 filter for smoothing and anti-aliasing - Fizick
 // nHeight is dst height which is reduced by 2 source height
 template <typename PixelType>
-static void RB2BilinearFilteredVertical(uint8_t * VS_RESTRICT pDst8, const uint8_t * VS_RESTRICT pSrc8, int nDstPitch,
-                                        int nSrcPitch, int nWidth, int nHeight, int opt) {
+static void RB2BilinearFilteredVertical(uint8_t * VS_RESTRICT pDst8, const uint8_t * VS_RESTRICT pSrc8, ptrdiff_t nDstPitch,
+                                        ptrdiff_t nSrcPitch, int nWidth, int nHeight, int opt) {
 
     PixelType *pDst = (PixelType *)pDst8;
     PixelType *pSrc = (PixelType *)pSrc8;
@@ -561,7 +561,7 @@ static void RB2BilinearFilteredVertical(uint8_t * VS_RESTRICT pDst8, const uint8
 // BilinearFiltered with 1/8, 3/8, 3/8, 1/8 filter for smoothing and anti-aliasing - Fizick
 // nWidth is dst height which is reduced by 2 source width
 template <typename PixelType>
-static void RB2BilinearFilteredHorizontalInplace(uint8_t *VS_RESTRICT pSrc8, int nSrcPitch, int nWidth, int nHeight, int opt) {
+static void RB2BilinearFilteredHorizontalInplace(uint8_t *VS_RESTRICT pSrc8, ptrdiff_t nSrcPitch, int nWidth, int nHeight, int opt) {
 
     PixelType *pSrc = (PixelType *)pSrc8;
 
@@ -597,8 +597,8 @@ static void RB2BilinearFilteredHorizontalInplace(uint8_t *VS_RESTRICT pSrc8, int
 // separable BilinearFiltered with 1/8, 3/8, 3/8, 1/8 filter for smoothing and anti-aliasing - Fizick v.2.5.2
 // assume he have enough horizontal dimension for intermediate results (double as final)
 template <typename PixelType>
-static void RB2BilinearFiltered(uint8_t *pDst, const uint8_t *pSrc, int nDstPitch,
-                                int nSrcPitch, int nWidth, int nHeight, int opt) {
+static void RB2BilinearFiltered(uint8_t *pDst, const uint8_t *pSrc, ptrdiff_t nDstPitch,
+                                ptrdiff_t nSrcPitch, int nWidth, int nHeight, int opt) {
     RB2BilinearFilteredVertical<PixelType>(pDst, pSrc, nDstPitch, nSrcPitch, nWidth * 2, nHeight, opt); /* intermediate half height */
     RB2BilinearFilteredHorizontalInplace<PixelType>(pDst, nDstPitch, nWidth, nHeight, opt);             /* inpace width reduction */
 }
@@ -607,8 +607,8 @@ static void RB2BilinearFiltered(uint8_t *pDst, const uint8_t *pSrc, int nDstPitc
 // filtered Quadratic with 1/64, 9/64, 22/64, 22/64, 9/64, 1/64 filter for smoothing and anti-aliasing - Fizick
 // nHeight is dst height which is reduced by 2 source height
 template <typename PixelType>
-static void RB2QuadraticVertical(uint8_t *VS_RESTRICT pDst8, const uint8_t *VS_RESTRICT pSrc8, int nDstPitch,
-                                 int nSrcPitch, int nWidth, int nHeight, int opt) {
+static void RB2QuadraticVertical(uint8_t *VS_RESTRICT pDst8, const uint8_t *VS_RESTRICT pSrc8, ptrdiff_t nDstPitch,
+                                 ptrdiff_t nSrcPitch, int nWidth, int nHeight, int opt) {
     PixelType *pDst = (PixelType *)pDst8;
     PixelType *pSrc = (PixelType *)pSrc8;
 
@@ -665,7 +665,7 @@ static void RB2QuadraticVertical(uint8_t *VS_RESTRICT pDst8, const uint8_t *VS_R
 // filtered Quadratic with 1/64, 9/64, 22/64, 22/64, 9/64, 1/64 filter for smoothing and anti-aliasing - Fizick
 // nWidth is dst height which is reduced by 2 source width
 template <typename PixelType>
-static void RB2QuadraticHorizontalInplace(uint8_t *VS_RESTRICT pSrc8, int nSrcPitch, int nWidth, int nHeight, int opt) {
+static void RB2QuadraticHorizontalInplace(uint8_t *VS_RESTRICT pSrc8, ptrdiff_t nSrcPitch, int nWidth, int nHeight, int opt) {
     PixelType *pSrc = (PixelType *)pSrc8;
 
     nSrcPitch /= sizeof(PixelType);
@@ -714,8 +714,8 @@ static void RB2QuadraticHorizontalInplace(uint8_t *VS_RESTRICT pSrc8, int nSrcPi
 // separable filtered Quadratic with 1/64, 9/64, 22/64, 22/64, 9/64, 1/64 filter for smoothing and anti-aliasing - Fizick v.2.5.2
 // assume he have enough horizontal dimension for intermediate results (double as final)
 template <typename PixelType>
-static void RB2Quadratic(uint8_t *pDst, const uint8_t *pSrc, int nDstPitch,
-                         int nSrcPitch, int nWidth, int nHeight, int opt) {
+static void RB2Quadratic(uint8_t *pDst, const uint8_t *pSrc, ptrdiff_t nDstPitch,
+                         ptrdiff_t nSrcPitch, int nWidth, int nHeight, int opt) {
     RB2QuadraticVertical<PixelType>(pDst, pSrc, nDstPitch, nSrcPitch, nWidth * 2, nHeight, opt); /* intermediate half height */
     RB2QuadraticHorizontalInplace<PixelType>(pDst, nDstPitch, nWidth, nHeight, opt);             /* inpace width reduction */
 }
@@ -724,8 +724,8 @@ static void RB2Quadratic(uint8_t *pDst, const uint8_t *pSrc, int nDstPitch,
 // filtered qubic with 1/32, 5/32, 10/32, 10/32, 5/32, 1/32 filter for smoothing and anti-aliasing - Fizick
 // nHeight is dst height which is reduced by 2 source height
 template <typename PixelType>
-static void RB2CubicVertical(uint8_t * VS_RESTRICT pDst8, const uint8_t * VS_RESTRICT pSrc8, int nDstPitch,
-                             int nSrcPitch, int nWidth, int nHeight, int opt) {
+static void RB2CubicVertical(uint8_t * VS_RESTRICT pDst8, const uint8_t * VS_RESTRICT pSrc8, ptrdiff_t nDstPitch,
+                             ptrdiff_t nSrcPitch, int nWidth, int nHeight, int opt) {
     PixelType *pDst = (PixelType *)pDst8;
     PixelType *pSrc = (PixelType *)pSrc8;
 
@@ -782,7 +782,7 @@ static void RB2CubicVertical(uint8_t * VS_RESTRICT pDst8, const uint8_t * VS_RES
 // filtered qubic with 1/32, 5/32, 10/32, 10/32, 5/32, 1/32 filter for smoothing and anti-aliasing - Fizick
 // nWidth is dst height which is reduced by 2 source width
 template <typename PixelType>
-static void RB2CubicHorizontalInplace(uint8_t * VS_RESTRICT pSrc8, int nSrcPitch, int nWidth, int nHeight, int opt) {
+static void RB2CubicHorizontalInplace(uint8_t * VS_RESTRICT pSrc8, ptrdiff_t nSrcPitch, int nWidth, int nHeight, int opt) {
     PixelType *pSrc = (PixelType *)pSrc8;
 
     nSrcPitch /= sizeof(PixelType);
@@ -830,8 +830,8 @@ static void RB2CubicHorizontalInplace(uint8_t * VS_RESTRICT pSrc8, int nSrcPitch
 // separable filtered cubic with 1/32, 5/32, 10/32, 10/32, 5/32, 1/32 filter for smoothing and anti-aliasing - Fizick v.2.5.2
 // assume he have enough horizontal dimension for intermediate results (double as final)
 template <typename PixelType>
-static void RB2Cubic(uint8_t *pDst, const uint8_t *pSrc, int nDstPitch,
-                     int nSrcPitch, int nWidth, int nHeight, int opt) {
+static void RB2Cubic(uint8_t *pDst, const uint8_t *pSrc, ptrdiff_t nDstPitch,
+                     ptrdiff_t nSrcPitch, int nWidth, int nHeight, int opt) {
     RB2CubicVertical<PixelType>(pDst, pSrc, nDstPitch, nSrcPitch, nWidth * 2, nHeight, opt); /* intermediate half height */
     RB2CubicHorizontalInplace<PixelType>(pDst, nDstPitch, nWidth, nHeight, opt);             /* inpace width reduction */
 }
@@ -877,8 +877,8 @@ static void VerticalWiener(uint8_t * VS_RESTRICT pDst8, const uint8_t * VS_RESTR
         pDst += nPitch;
         pSrc += nPitch;
     }
-    for (int j = nHeight - 4; j < nHeight - 1; j++) {
-        for (int i = 0; i < nWidth; i++) {
+    for (intptr_t j = nHeight - 4; j < nHeight - 1; j++) {
+        for (intptr_t i = 0; i < nWidth; i++) {
             pDst[i] = (pSrc[i] + pSrc[i + nPitch] + 1) >> 1;
         }
 
@@ -924,7 +924,7 @@ static void HorizontalWiener(uint8_t * VS_RESTRICT pDst8, const uint8_t * VS_RES
             pDst[i] = max(0, min(m0, pixelMax));
         }
 
-        for (int i = nWidth - 4; i < nWidth - 1; i++)
+        for (intptr_t i = nWidth - 4; i < nWidth - 1; i++)
             pDst[i] = (pSrc[i] + pSrc[i + 1] + 1) >> 1;
 
         pDst[nWidth - 1] = pSrc[nWidth - 1];
@@ -959,7 +959,7 @@ static void VerticalBicubic(uint8_t * VS_RESTRICT pDst8, const uint8_t * VS_REST
         pDst += nPitch;
         pSrc += nPitch;
     }
-    for (int j = nHeight - 3; j < nHeight - 1; j++) {
+    for (intptr_t j = nHeight - 3; j < nHeight - 1; j++) {
         for (int i = 0; i < nWidth; i++) {
             pDst[i] = (pSrc[i] + pSrc[i + nPitch] + 1) >> 1;
         }
@@ -989,7 +989,7 @@ static void HorizontalBicubic(uint8_t * VS_RESTRICT pDst8, const uint8_t * VS_RE
             pDst[i] = min(pixelMax, max(0,
                                         (-(pSrc[i - 1] + pSrc[i + 2]) + (pSrc[i] + pSrc[i + 1]) * 9 + 8) >> 4));
         }
-        for (int i = nWidth - 3; i < nWidth - 1; i++)
+        for (intptr_t i = nWidth - 3; i < nWidth - 1; i++)
             pDst[i] = (pSrc[i] + pSrc[i + 1] + 1) >> 1;
 
         pDst[nWidth - 1] = pSrc[nWidth - 1];
@@ -1049,11 +1049,11 @@ int PlaneWidthLuma(int src_width, int level, int xRatioUV, int hpad) {
 }
 
 
-unsigned int PlaneSuperOffset(int chroma, int src_height, int level, int pel, int vpad, int plane_pitch, int yRatioUV) {
+ptrdiff_t PlaneSuperOffset(int chroma, int src_height, int level, int pel, int vpad, ptrdiff_t plane_pitch, int yRatioUV) {
     // storing subplanes in superframes may be implemented by various ways
     int height = src_height; // luma or chroma
 
-    unsigned int offset;
+    ptrdiff_t offset;
 
     if (level == 0)
         offset = 0;
@@ -1071,7 +1071,7 @@ unsigned int PlaneSuperOffset(int chroma, int src_height, int level, int pel, in
 
 
 template <typename PixelType>
-static void PadCorner(PixelType * VS_RESTRICT p, PixelType v, int hPad, int vPad, int refPitch) {
+static void PadCorner(PixelType * VS_RESTRICT p, PixelType v, int hPad, int vPad, ptrdiff_t refPitch) {
     for (int i = 0; i < vPad; i++) {
         if (sizeof(PixelType) == 1)
             memset(p, v, hPad); /* faster than loop */
@@ -1085,7 +1085,7 @@ static void PadCorner(PixelType * VS_RESTRICT p, PixelType v, int hPad, int vPad
 
 
 template <typename PixelType>
-static void PadReferenceFrame(uint8_t * VS_RESTRICT refFrame8, int refPitch, int hPad, int vPad, int width, int height) {
+static void PadReferenceFrame(uint8_t * VS_RESTRICT refFrame8, ptrdiff_t refPitch, int hPad, int vPad, int width, int height) {
     refPitch /= sizeof(PixelType);
     PixelType *refFrame = (PixelType *)refFrame8;
     PixelType value;
@@ -1176,7 +1176,7 @@ void mvpResetState(MVPlane *mvp) {
 }
 
 
-void mvpUpdate(MVPlane *mvp, uint8_t *pSrc, int _nPitch) { //v2.0
+void mvpUpdate(MVPlane *mvp, uint8_t *pSrc, ptrdiff_t _nPitch) { //v2.0
     mvp->nPitch = _nPitch;
     mvp->nOffsetPadding = mvp->nPitch * mvp->nVPadding + mvp->nHPadding * mvp->bytesPerSample;
 
@@ -1187,7 +1187,7 @@ void mvpUpdate(MVPlane *mvp, uint8_t *pSrc, int _nPitch) { //v2.0
 }
 
 
-void mvpFillPlane(MVPlane *mvp, const uint8_t *pNewPlane, int nNewPitch) {
+void mvpFillPlane(MVPlane *mvp, const uint8_t *pNewPlane, ptrdiff_t nNewPitch) {
     if (!mvp->isFilled)
         vsh::bitblt(mvp->pPlane[0] + mvp->nOffsetPadding, mvp->nPitch, pNewPlane, nNewPitch, mvp->nWidth * mvp->bytesPerSample, mvp->nHeight);
     mvp->isFilled = 1;
@@ -1335,18 +1335,18 @@ void mvpRefine(MVPlane *mvp, int sharp) {
 
 
 template <typename PixelType>
-static void mvpRefineExtPel2(MVPlane *mvp, const uint8_t *pSrc2x8, int nSrc2xPitch, int isExtPadded) {
+static void mvpRefineExtPel2(MVPlane *mvp, const uint8_t *pSrc2x8, ptrdiff_t nSrc2xPitch, int isExtPadded) {
     const PixelType *pSrc2x = (const PixelType *)pSrc2x8;
     PixelType *pp1 = (PixelType *)mvp->pPlane[1];
     PixelType *pp2 = (PixelType *)mvp->pPlane[2];
     PixelType *pp3 = (PixelType *)mvp->pPlane[3];
 
     nSrc2xPitch /= sizeof(PixelType);
-    int nPitchTmp = mvp->nPitch / sizeof(PixelType);
+    ptrdiff_t nPitchTmp = mvp->nPitch / sizeof(PixelType);
 
     /* pel clip may be already padded (i.e. is finest clip) */
     if (!isExtPadded) {
-        int offset = nPitchTmp * mvp->nVPadding + mvp->nHPadding;
+        ptrdiff_t offset = nPitchTmp * mvp->nVPadding + mvp->nHPadding;
         pp1 += offset;
         pp2 += offset;
         pp3 += offset;
@@ -1374,17 +1374,17 @@ static void mvpRefineExtPel2(MVPlane *mvp, const uint8_t *pSrc2x8, int nSrc2xPit
 
 
 template <typename PixelType>
-static void mvpRefineExtPel4(MVPlane *mvp, const uint8_t *pSrc2x8, int nSrc2xPitch, int isExtPadded) {
+static void mvpRefineExtPel4(MVPlane *mvp, const uint8_t *pSrc2x8, ptrdiff_t nSrc2xPitch, int isExtPadded) {
     const PixelType *pSrc2x = (const PixelType *)pSrc2x8;
     PixelType *pp[16];
     for (int i = 1; i < 16; i++)
         pp[i] = (PixelType *)mvp->pPlane[i];
 
     nSrc2xPitch /= sizeof(PixelType);
-    int nPitchTmp = mvp->nPitch / sizeof(PixelType);
+    ptrdiff_t nPitchTmp = mvp->nPitch / sizeof(PixelType);
 
     if (!isExtPadded) {
-        int offset = nPitchTmp * mvp->nVPadding + mvp->nHPadding;
+        ptrdiff_t offset = nPitchTmp * mvp->nVPadding + mvp->nHPadding;
         for (int i = 1; i < 16; i++)
             pp[i] += offset;
     }
@@ -1420,7 +1420,7 @@ static void mvpRefineExtPel4(MVPlane *mvp, const uint8_t *pSrc2x8, int nSrc2xPit
 }
 
 
-void mvpRefineExt(MVPlane *mvp, const uint8_t *pSrc2x, int nSrc2xPitch, int isExtPadded) // copy from external upsized clip
+void mvpRefineExt(MVPlane *mvp, const uint8_t *pSrc2x, ptrdiff_t nSrc2xPitch, int isExtPadded) // copy from external upsized clip
 {
     if ((mvp->nPel == 2) && (!mvp->isRefined)) {
         if (mvp->bytesPerSample == 1)
@@ -1442,7 +1442,7 @@ void mvpReduceTo(MVPlane *mvp, MVPlane *pReducedPlane, int rfilter) {
     if (pReducedPlane->isFilled)
         return;
 
-    typedef void (*ReduceFunction)(uint8_t *pDst, const uint8_t *pSrc, int nDstPitch, int nSrcPitch, int nWidth, int nHeight, int opt);
+    typedef void (*ReduceFunction)(uint8_t *pDst, const uint8_t *pSrc, ptrdiff_t nDstPitch, ptrdiff_t nSrcPitch, int nWidth, int nHeight, int opt);
 
     ReduceFunction reduce = NULL;
 
@@ -1595,7 +1595,7 @@ void mvfDeinit(MVFrame *mvf) {
 }
 
 
-void mvfUpdate(MVFrame *mvf, uint8_t **pSrc, int *pitch) {
+void mvfUpdate(MVFrame *mvf, uint8_t **pSrc, ptrdiff_t *pitch) {
     for (int i = 0; i < 3; i++) {
         if (pSrc[i] && mvf->planes[i])
             mvpUpdate(mvf->planes[i], pSrc[i], pitch[i]);
@@ -1603,7 +1603,7 @@ void mvfUpdate(MVFrame *mvf, uint8_t **pSrc, int *pitch) {
 }
 
 
-void mvfFillPlane(MVFrame *mvf, const uint8_t *pNewPlane, int nNewPitch, int plane) {
+void mvfFillPlane(MVFrame *mvf, const uint8_t *pNewPlane, ptrdiff_t nNewPitch, int plane) {
     if (mvf->planes[plane])
         mvpFillPlane(mvf->planes[plane], pNewPlane, nNewPitch);
 }
@@ -1686,7 +1686,7 @@ void mvgofDeinit(MVGroupOfFrames *mvgof) {
 }
 
 
-void mvgofUpdate(MVGroupOfFrames *mvgof, uint8_t **pSrc, int *pitch) {
+void mvgofUpdate(MVGroupOfFrames *mvgof, uint8_t **pSrc, ptrdiff_t *pitch) {
     for (int i = 0; i < mvgof->nLevelCount; i++) {
         uint8_t *planes[3] = { NULL };
 
@@ -1707,7 +1707,7 @@ MVFrame *mvgofGetFrame(MVGroupOfFrames *mvgof, int nLevel) {
 }
 
 
-void mvgofSetPlane(MVGroupOfFrames *mvgof, const uint8_t *pNewSrc, int nNewPitch, int plane) {
+void mvgofSetPlane(MVGroupOfFrames *mvgof, const uint8_t *pNewSrc, ptrdiff_t nNewPitch, int plane) {
     mvfFillPlane(mvgof->frames[0], pNewSrc, nNewPitch, plane);
 }
 

@@ -58,7 +58,7 @@ static const VSFrame *VS_CC mvfinestGetFrame(int n, int activationReason, void *
 
         uint8_t *pDst[3];
         const uint8_t *pRef[3];
-        int nDstPitches[3], nRefPitches[3];
+        ptrdiff_t nDstPitches[3], nRefPitches[3];
 
         for (int i = 0; i < d->vi.format.numPlanes; i++) {
             pDst[i] = vsapi->getWritePtr(dst, i);
@@ -164,7 +164,7 @@ static void VS_CC mvfinestCreate(const VSMap *in, VSMap *out, void *userData, VS
 #define ERROR_SIZE 1024
     char errorMsg[ERROR_SIZE] = "Finest: failed to retrieve first frame from super clip. Error message: ";
     size_t errorLen = strlen(errorMsg);
-    const VSFrame *evil = vsapi->getFrame(0, d.super, errorMsg + errorLen, ERROR_SIZE - errorLen);
+    const VSFrame *evil = vsapi->getFrame(0, d.super, errorMsg + errorLen, ERROR_SIZE - (int)errorLen);
 #undef ERROR_SIZE
     if (!evil) {
         vsapi->mapSetError(out, errorMsg);

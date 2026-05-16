@@ -69,8 +69,8 @@ typedef struct MVFlowBlurData {
 
 
 #define RealFlowBlur(PixelType) \
-static void RealFlowBlur_##PixelType(uint8_t *pdst8, int dst_pitch, const uint8_t *pref8, int ref_pitch, \
-                         int16_t *VXFullB, int16_t *VXFullF, int16_t *VYFullB, int16_t *VYFullF, \
+static void RealFlowBlur_##PixelType(uint8_t * VS_RESTRICT pdst8, ptrdiff_t dst_pitch, const uint8_t * VS_RESTRICT pref8, ptrdiff_t ref_pitch, \
+                         const int16_t *VXFullB, const int16_t *VXFullF, const int16_t *VYFullB, const int16_t *VYFullF, \
                          int VPitch, int width, int height, int blur256, int prec, int nPel) { \
     const PixelType *pref = (const PixelType *)pref8; \
     PixelType *pdst = (PixelType *)pdst8; \
@@ -129,8 +129,8 @@ RealFlowBlur(uint8_t)
 RealFlowBlur(uint16_t)
 
 
-static void FlowBlur(uint8_t *pdst, int dst_pitch, const uint8_t *pref, int ref_pitch,
-                     int16_t *VXFullB, int16_t *VXFullF, int16_t *VYFullB, int16_t *VYFullF,
+static void FlowBlur(uint8_t *pdst, ptrdiff_t dst_pitch, const uint8_t *pref, ptrdiff_t ref_pitch,
+                     const int16_t *VXFullB, const int16_t *VXFullF, const int16_t *VYFullB, const int16_t *VYFullF,
                      int VPitch, int width, int height, int blur256, int prec, int nPel, int bitsPerSample) {
     if (bitsPerSample == 8)
         RealFlowBlur_uint8_t(pdst, dst_pitch, pref, ref_pitch, VXFullB, VXFullF, VYFullB, VYFullF, VPitch, width, height, blur256, prec, nPel);
@@ -157,8 +157,8 @@ static const VSFrame *VS_CC mvflowblurGetFrame(int n, int activationReason, void
     } else if (activationReason == arAllFramesReady) {
         uint8_t *pDst[3];
         const uint8_t *pRef[3];
-        int nDstPitches[3];
-        int nRefPitches[3];
+        ptrdiff_t nDstPitches[3];
+        ptrdiff_t nRefPitches[3];
 
         FakeGroupOfPlanes fgopF, fgopB;
 
@@ -217,8 +217,8 @@ static const VSFrame *VS_CC mvflowblurGetFrame(int n, int activationReason, void
             int bitsPerSample = d->vi->format.bitsPerSample;
             int bytesPerSample = d->vi->format.bytesPerSample;
 
-            int nOffsetY = nRefPitches[0] * nVPadding * nPel + nHPadding * bytesPerSample * nPel;
-            int nOffsetUV = nRefPitches[1] * nVPaddingUV * nPel + nHPaddingUV * bytesPerSample * nPel;
+            ptrdiff_t nOffsetY = nRefPitches[0] * nVPadding * nPel + nHPadding * bytesPerSample * nPel;
+            ptrdiff_t nOffsetUV = nRefPitches[1] * nVPaddingUV * nPel + nHPaddingUV * bytesPerSample * nPel;
 
 
             size_t full_size = nHeight * VPitchY * sizeof(int16_t);
@@ -389,7 +389,7 @@ static void VS_CC mvflowblurCreate(const VSMap *in, VSMap *out, void *userData, 
 #define ERROR_SIZE 1024
     char errorMsg[ERROR_SIZE] = "FlowBlur: failed to retrieve first frame from super clip. Error message: ";
     size_t errorLen = strlen(errorMsg);
-    const VSFrame *evil = vsapi->getFrame(0, d.super, errorMsg + errorLen, ERROR_SIZE - errorLen);
+    const VSFrame *evil = vsapi->getFrame(0, d.super, errorMsg + errorLen, ERROR_SIZE - (int)errorLen);
 #undef ERROR_SIZE
     if (!evil) {
         vsapi->mapSetError(out, errorMsg);

@@ -40,7 +40,7 @@ enum FlowModes {
 };
 
 
-typedef void (*FlowFunction)(uint8_t *pdst, int dst_pitch, const uint8_t *pref, int ref_pitch, int16_t *VXFull, int VXPitch, int16_t *VYFull, int VYPitch, int width, int height, int time256, int nPel);
+typedef void (*FlowFunction)(uint8_t *pdst, ptrdiff_t dst_pitch, const uint8_t *pref, ptrdiff_t ref_pitch, int16_t *VXFull, ptrdiff_t VXPitch, int16_t *VYFull, ptrdiff_t VYPitch, int width, int height, int time256, int nPel);
 
 typedef void * (*MemsetFunction)(void *ptr, int value, size_t bytes);
 
@@ -90,7 +90,7 @@ typedef struct MVFlowData {
 
 
 template <typename PixelType>
-static void flowFetch(uint8_t *pdst8, int dst_pitch, const uint8_t *pref8, int ref_pitch, int16_t *VXFull, int VXPitch, int16_t *VYFull, int VYPitch, int width, int height, int time256, int nPel) {
+static void flowFetch(uint8_t *pdst8, ptrdiff_t dst_pitch, const uint8_t *pref8, ptrdiff_t ref_pitch, int16_t *VXFull, ptrdiff_t VXPitch, int16_t *VYFull, ptrdiff_t VYPitch, int width, int height, int time256, int nPel) {
     const PixelType *pref = (const PixelType *)pref8;
     PixelType *pdst = (PixelType *)pdst8;
 
@@ -116,7 +116,7 @@ static void flowFetch(uint8_t *pdst8, int dst_pitch, const uint8_t *pref8, int r
 
 
 template <typename PixelType>
-static void flowShift(uint8_t *pdst8, int dst_pitch, const uint8_t *pref8, int ref_pitch, int16_t *VXFull, int VXPitch, int16_t *VYFull, int VYPitch, int width, int height, int time256, int nPel) {
+static void flowShift(uint8_t *pdst8, ptrdiff_t dst_pitch, const uint8_t *pref8, ptrdiff_t ref_pitch, int16_t *VXFull, ptrdiff_t VXPitch, int16_t *VYFull, ptrdiff_t VYPitch, int width, int height, int time256, int nPel) {
     const PixelType *pref = (const PixelType *)pref8;
     PixelType *pdst = (PixelType *)pdst8;
 
@@ -201,8 +201,8 @@ static const VSFrame *VS_CC mvflowGetFrame(int n, int activationReason, void *in
 
         uint8_t *pDst[3];
         const uint8_t *pRef[3];
-        int nDstPitches[3];
-        int nRefPitches[3];
+        ptrdiff_t nDstPitches[3];
+        ptrdiff_t nRefPitches[3];
 
         FakeGroupOfPlanes fgop;
         fgopInit(&fgop, &d->vectors_data);
@@ -304,8 +304,8 @@ static const VSFrame *VS_CC mvflowGetFrame(int n, int activationReason, void *in
             d->upsizer.simpleResize_int16_t(&d->upsizer, VXFullY, VPitchY, VXSmallY, nBlkXP, 1);
             d->upsizer.simpleResize_int16_t(&d->upsizer, VYFullY, VPitchY, VYSmallY, nBlkXP, 0);
 
-            int nOffsetY = nRefPitches[0] * nVPadding * nPel + nHPadding * bytesPerSample * nPel;
-            int nOffsetUV = nRefPitches[1] * nVPaddingUV * nPel + nHPaddingUV * bytesPerSample * nPel;
+            ptrdiff_t nOffsetY = nRefPitches[0] * nVPadding * nPel + nHPadding * bytesPerSample * nPel;
+            ptrdiff_t nOffsetUV = nRefPitches[1] * nVPaddingUV * nPel + nHPaddingUV * bytesPerSample * nPel;
 
             if (d->mode == Shift)
                 d->memset_function(pDst[0], d->pixel_max, nHeight * nDstPitches[0]);
@@ -438,7 +438,7 @@ static void VS_CC mvflowCreate(const VSMap *in, VSMap *out, void *userData, VSCo
 #define ERROR_SIZE 1024
     char errorMsg[ERROR_SIZE] = "Flow: failed to retrieve first frame from super clip. Error message: ";
     size_t errorLen = strlen(errorMsg);
-    const VSFrame *evil = vsapi->getFrame(0, d.super, errorMsg + errorLen, ERROR_SIZE - errorLen);
+    const VSFrame *evil = vsapi->getFrame(0, d.super, errorMsg + errorLen, ERROR_SIZE - (int)errorLen);
 #undef ERROR_SIZE
     if (!evil) {
         vsapi->mapSetError(out, errorMsg);

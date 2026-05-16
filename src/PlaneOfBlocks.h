@@ -77,9 +77,9 @@ typedef struct PlaneOfBlocks {
     MVFrame *pSrcFrame;
     MVFrame *pRefFrame;
 
-    int nSrcPitch[3];
+    ptrdiff_t nSrcPitch[3];
     const uint8_t *pSrc[3]; // the alignment of this array is important for speed for some reason (cacheline?)
-    int nRefPitch[3];
+    ptrdiff_t nRefPitch[3];
 
     VECTOR bestMV;    /* best vector found so far during the search */
     int64_t nMinCost; /* minimum cost ( sad + mv cost ) found so far */

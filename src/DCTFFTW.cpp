@@ -28,7 +28,7 @@ static const float sqrt_2_div_2 = 0.70710678118654752440084436210485f;
 
 
 template <typename PixelType>
-static void Float2Pixels_C(const DCTFFTW *dct, uint8_t *dstp8, int dst_pitch, float *realdata) {
+static void Float2Pixels_C(const DCTFFTW *dct, uint8_t *dstp8, ptrdiff_t dst_pitch, float *realdata) {
     PixelType *dstp = (PixelType *)dstp8;
     dst_pitch /= sizeof(PixelType);
 
@@ -63,7 +63,7 @@ static void Float2Pixels_C(const DCTFFTW *dct, uint8_t *dstp8, int dst_pitch, fl
 #endif
 
 template <typename PixelType>
-static void Float2Pixels_SSE2(const DCTFFTW *dct, uint8_t *dstp8, int dst_pitch, float *realdata) {
+static void Float2Pixels_SSE2(const DCTFFTW *dct, uint8_t *dstp8, ptrdiff_t dst_pitch, float *realdata) {
     PixelType *dstp = (PixelType *)dstp8;
     dst_pitch /= sizeof(PixelType);
 
@@ -185,7 +185,7 @@ void dctDeinit(DCTFFTW *dct) {
 
 //  put source data to real array for FFT
 template <typename PixelType>
-static void Pixels2Float(const DCTFFTW *dct, const uint8_t *srcp8, int src_pitch, float *realdata) {
+static void Pixels2Float(const DCTFFTW *dct, const uint8_t *srcp8, ptrdiff_t src_pitch, float *realdata) {
     for (int j = 0; j < dct->sizey; j++) {
         for (int i = 0; i < dct->sizex; i++) {
             PixelType *srcp = (PixelType *)srcp8;
@@ -197,7 +197,7 @@ static void Pixels2Float(const DCTFFTW *dct, const uint8_t *srcp8, int src_pitch
 }
 
 
-void dctBytes2D(DCTFFTW *dct, const uint8_t *srcp, int src_pitch, uint8_t *dctp, int dct_pitch) {
+void dctBytes2D(DCTFFTW *dct, const uint8_t *srcp, ptrdiff_t src_pitch, uint8_t *dctp, ptrdiff_t dct_pitch) {
     if (dct->bitsPerSample == 8) {
         Pixels2Float<uint8_t>(dct, srcp, src_pitch, dct->fSrc);
     } else {

@@ -102,9 +102,9 @@ static const VSFrame *VS_CC mvflowinterGetFrame(int n, int activationReason, voi
     } else if (activationReason == arAllFramesReady) {
         uint8_t *pDst[3];
         const uint8_t *pRef[3], *pSrc[3];
-        int nDstPitches[3];
-        int nRefPitches[3];
-        int nSrcPitches[3];
+        ptrdiff_t nDstPitches[3];
+        ptrdiff_t nRefPitches[3];
+        ptrdiff_t nSrcPitches[3];
 
         FakeGroupOfPlanes fgopF, fgopB;
 
@@ -177,8 +177,8 @@ static const VSFrame *VS_CC mvflowinterGetFrame(int n, int activationReason, voi
             SimpleResize *upsizer = &d->upsizer;
             SimpleResize *upsizerUV = &d->upsizerUV;
 
-            int nOffsetY = nRefPitches[0] * nVPadding * nPel + nHPadding * bytesPerSample * nPel;
-            int nOffsetUV = nRefPitches[1] * nVPaddingUV * nPel + nHPaddingUV * bytesPerSample * nPel;
+            ptrdiff_t nOffsetY = nRefPitches[0] * nVPadding * nPel + nHPadding * bytesPerSample * nPel;
+            ptrdiff_t nOffsetUV = nRefPitches[1] * nVPaddingUV * nPel + nHPaddingUV * bytesPerSample * nPel;
 
 
             int16_t *VXFullYB = (int16_t *)malloc(nHeightP * VPitchY * sizeof(int16_t));
@@ -520,7 +520,7 @@ static void VS_CC mvflowinterCreate(const VSMap *in, VSMap *out, void *userData,
 #define ERROR_SIZE 1024
     char errorMsg[ERROR_SIZE] = "FlowInter: failed to retrieve first frame from super clip. Error message: ";
     size_t errorLen = strlen(errorMsg);
-    const VSFrame *evil = vsapi->getFrame(0, d.super, errorMsg + errorLen, ERROR_SIZE - errorLen);
+    const VSFrame *evil = vsapi->getFrame(0, d.super, errorMsg + errorLen, ERROR_SIZE - (int)errorLen);
 #undef ERROR_SIZE
     if (!evil) {
         vsapi->mapSetError(out, errorMsg);

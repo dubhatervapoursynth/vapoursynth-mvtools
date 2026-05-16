@@ -258,7 +258,7 @@ static const VSFrame *VS_CC depanAnalyseGetFrame(int n, int activationReason, vo
         const int nFields = d->fields ? 2 : 1;
 
         const uint8_t *maskp = NULL;
-        int mask_pitch = 0;
+        ptrdiff_t mask_pitch = 0;
         if (d->mask) {
             maskp = vsapi->getReadPtr(mask, 0);
             mask_pitch = vsapi->getStride(mask, 0);
@@ -648,7 +648,7 @@ typedef struct DepanEstimateData {
 
 
 // put source data to real array for FFT
-static void frame_data2d(const uint8_t *srcp, int pitch, float *realdata, int winx, int winy, int winleft, int h0, int bytes_per_sample) {
+static void frame_data2d(const uint8_t *srcp, ptrdiff_t pitch, float * VS_RESTRICT realdata, int winx, int winy, int winleft, int h0, int bytes_per_sample) {
     int i, j;
     int winxpadded = (winx / 2 + 1) * 2;
 
@@ -678,7 +678,7 @@ static void frame_data2d(const uint8_t *srcp, int pitch, float *realdata, int wi
 }
 
 
-static void mult_conj_data2d(const fftwf_complex *fftnext, const fftwf_complex *fftsrc, fftwf_complex *mult, int winx, int winy) {
+static void mult_conj_data2d(const fftwf_complex * VS_RESTRICT fftnext, const fftwf_complex * VS_RESTRICT fftsrc, fftwf_complex * VS_RESTRICT mult, int winx, int winy) {
     // multiply complex conj. *next to src
     // (hermit)
     int nx = winx / 2 + 1; //padded, odd
@@ -697,7 +697,7 @@ static void mult_conj_data2d(const fftwf_complex *fftnext, const fftwf_complex *
 }
 
 
-static void get_motion_vector(const float *correl, int winx, int winy, float trust_limit, int dxmax, int dymax, float stab, int fieldbased, int top_field, float pixaspect, float *fdx, float *fdy, float *trust) {
+static void get_motion_vector(const float * VS_RESTRICT correl, int winx, int winy, float trust_limit, int dxmax, int dymax, float stab, int fieldbased, int top_field, float pixaspect, float *fdx, float *fdy, float *trust) {
     float correlmax, cur, correlmean;
     float f1, f2;
     float xadd = 0.0f;
@@ -884,7 +884,7 @@ static void get_motion_vector(const float *correl, int winx, int winy, float tru
 
 
 // get forward fft of src frame plane
-static void get_plane_fft(const uint8_t *srcp, int src_pitch, fftwf_complex *fftsrc, int winx, int winy, int winleft, int wintop, fftwf_plan plan, int bytes_per_sample) {
+static void get_plane_fft(const uint8_t *srcp, ptrdiff_t src_pitch, fftwf_complex *fftsrc, int winx, int winy, int winleft, int wintop, fftwf_plan plan, int bytes_per_sample) {
     // prepare 2d data for fft
     frame_data2d(srcp, src_pitch, (float *)fftsrc, winx, winy, winleft, wintop, bytes_per_sample);
     // make forward fft of data
@@ -892,7 +892,7 @@ static void get_plane_fft(const uint8_t *srcp, int src_pitch, fftwf_complex *fft
 }
 
 
-static void showcorrelation(const float *correl, int winx, int winy, uint8_t *dstp, int dst_pitch, int winleft, int wintop, int pixel_max) {
+static void showcorrelation(const float * VS_RESTRICT correl, int winx, int winy, uint8_t *dstp, ptrdiff_t dst_pitch, int winleft, int wintop, int pixel_max) {
     float correlmax, correlmin, cur;
     int i, j;
     int winxpadded = (winx / 2 + 1) * 2;
@@ -966,7 +966,7 @@ static const VSFrame *VS_CC depanEstimateStage1GetFrame(int n, int activationRea
         vsapi->freeFrame(src);
 
         const uint8_t *dstp = vsapi->getReadPtr(dst, 0);
-        int stride = vsapi->getStride(dst, 0);
+        ptrdiff_t stride = vsapi->getStride(dst, 0);
 
         fftwf_complex *fft = (fftwf_complex *)fftwf_malloc(d->fftsize);
 
@@ -976,7 +976,7 @@ static const VSFrame *VS_CC depanEstimateStage1GetFrame(int n, int activationRea
 
         VSMap *dst_props = vsapi->getFramePropertiesRW(dst);
 
-        vsapi->mapSetData(dst_props, prop_DepanEstimateFFT, (const char *)fft, d->fftsize, dtBinary, maReplace);
+        vsapi->mapSetData(dst_props, prop_DepanEstimateFFT, (const char *)fft, static_cast<int>(d->fftsize), dtBinary, maReplace);
         fftwf_free(fft);
 
         if (d->zoommax != 1.0f) {
@@ -986,7 +986,7 @@ static const VSFrame *VS_CC depanEstimateStage1GetFrame(int n, int activationRea
 
             get_plane_fft(dstp, stride, fft2, d->winx, d->winy, winleft2, d->wtop, d->plan, d->vi->format.bytesPerSample);
 
-            vsapi->mapSetData(dst_props, prop_DepanEstimateFFT2, (const char *)fft2, d->fftsize, dtBinary, maReplace);
+            vsapi->mapSetData(dst_props, prop_DepanEstimateFFT2, (const char *)fft2, static_cast<int>(d->fftsize), dtBinary, maReplace);
             fftwf_free(fft2);
         }
 
@@ -1067,7 +1067,7 @@ static const VSFrame *VS_CC depanEstimateStage2GetFrame(int n, int activationRea
 
         VSFrame *dst = vsapi->copyFrame(cur, core);
         uint8_t *dstp = NULL;
-        int dst_stride = 0;
+        ptrdiff_t dst_stride = 0;
 
         if (d->show) { // show correlation sufrace
             dstp = vsapi->getWritePtr(dst, 0);
@@ -1503,7 +1503,7 @@ static void VS_CC depanEstimateCreate(const VSMap *in, VSMap *out, void *userDat
 }
 
 
-typedef void (*CompensateFunction)(uint8_t *dstp, const uint8_t *srcp, int pitch, int row_size, int height, const transform *tr, int mirror, int border, int *work1row_size, int blurmax, int pixel_max);
+typedef void (*CompensateFunction)(uint8_t *dstp, const uint8_t *srcp, ptrdiff_t pitch, int row_size, int height, const transform *tr, int mirror, int border, int *work1row_size, int blurmax, int pixel_max);
 
 
 typedef struct DepanCompensateData {
@@ -1624,7 +1624,7 @@ static void sumtransform(const transform *ta, const transform *tb, transform *tb
 // move plane of nextp frame to dstp for motion compensation by trc, trm with NEAREST pixels
 //
 template <typename PixelType>
-static void compensate_plane_nearest(uint8_t *dstp8, const uint8_t *srcp8, int pitch, int row_size, int height, const transform *tr, int mirror, int border, int *work1row_size, int blurmax, int pixel_max) {
+static void compensate_plane_nearest(uint8_t * VS_RESTRICT dstp8, const uint8_t * VS_RESTRICT srcp8, ptrdiff_t pitch, int row_size, int height, const transform *tr, int mirror, int border, int *work1row_size, int blurmax, int pixel_max) {
     // if border >=0, then we fill empty edge (border) pixels by that value
     // work1row_size is work array, it must have size >= 1*row_size
 
@@ -1646,7 +1646,7 @@ static void compensate_plane_nearest(uint8_t *dstp8, const uint8_t *srcp8, int p
     int h, row;
     int rowleft, hlow;
     float xsrc, ysrc;
-    int w0;
+    ptrdiff_t w0;
     int inttr0;
     int *rowleftwork = work1row_size;
 
@@ -1853,7 +1853,7 @@ static void compensate_plane_nearest(uint8_t *dstp8, const uint8_t *srcp8, int p
 //   t[0] = dxc, t[1] = dxx, t[2] = dxy, t[3] = dyc, t[4] = dyx, t[5] = dyy
 //
 template <typename PixelType>
-static void compensate_plane_bilinear(uint8_t *dstp8, const uint8_t *srcp8, int pitch, int row_size, int height, const transform *tr, int mirror, int border, int *work2row_size4356, int blurmax, int pixel_max) {
+static void compensate_plane_bilinear(uint8_t * VS_RESTRICT dstp8, const uint8_t * VS_RESTRICT srcp8, ptrdiff_t pitch, int row_size, int height, const transform *tr, int mirror, int border, int *work2row_size4356, int blurmax, int pixel_max) {
     // work2row_size is work array, it must have size >= 2*row_size
 
     (void)pixel_max;
@@ -1869,7 +1869,7 @@ static void compensate_plane_bilinear(uint8_t *dstp8, const uint8_t *srcp8, int 
     float sx, sy;
     //    float t0, t1, t2, t3, c0,c1,c2,c3;
     float xsrc, ysrc;
-    int w0;
+    ptrdiff_t w0;
     int intcoef[66];
     int intcoef2d[4];
     int ix2, iy2;
@@ -1880,7 +1880,7 @@ static void compensate_plane_bilinear(uint8_t *dstp8, const uint8_t *srcp8, int 
     int *intcoef2dzoom0 = ix2work + row_size; //[66][66]; // 4356
     int *intcoef2dzoom = intcoef2dzoom0;
 
-    int w;
+    ptrdiff_t w;
 
     int smoothed;
     int blurlen;
@@ -2200,7 +2200,7 @@ static void compensate_plane_bilinear(uint8_t *dstp8, const uint8_t *srcp8, int 
 //   t[0] = dxc, t[1] = dxx, t[2] = dxy, t[3] = dyc, t[4] = dyx, t[5] = dyy
 //
 template <typename PixelType>
-static void compensate_plane_bicubic(uint8_t *dstp8, const uint8_t *srcp8, int pitch, int row_size, int height, const transform *tr, int mirror, int border, int *work2width1030, int blurmax, int pixel_max) {
+static void compensate_plane_bicubic(uint8_t * VS_RESTRICT dstp8, const uint8_t * VS_RESTRICT srcp8, ptrdiff_t pitch, int row_size, int height, const transform *tr, int mirror, int border, int *work2width1030, int blurmax, int pixel_max) {
     // work2width1030 is integer work array, it must have size >= 2*row_size+1030
 
     const PixelType *srcp = (const PixelType *)srcp8;
@@ -2213,7 +2213,7 @@ static void compensate_plane_bicubic(uint8_t *dstp8, const uint8_t *srcp8, int p
     float sx, sy;
     //    float t0, t1, t2, t3, c0,c1,c2,c3;
     float xsrc, ysrc;
-    int w0;
+    ptrdiff_t w0;
     int ix4, iy4;
     int i, j;
     int inttr0, inttr3;
@@ -2224,7 +2224,7 @@ static void compensate_plane_bicubic(uint8_t *dstp8, const uint8_t *srcp8, int p
     int64_t ts[4];
     int intcoef2d[16];
 
-    int w;
+    ptrdiff_t w;
     int smoothed;
     int blurlen;
 
@@ -2435,7 +2435,7 @@ static void compensate_plane_bicubic(uint8_t *dstp8, const uint8_t *srcp8, int p
 
                         int64_t pixel = (intcoef[iy4] * ts[0] + intcoef[iy4 + 1] * ts[1] + intcoef[iy4 + 2] * ts[2] + intcoef[iy4 + 3] * ts[3]) >> 22;
 
-                        dstp[row] = VSMAX(VSMIN(pixel, pixel_max), 0);
+                        dstp[row] = static_cast<PixelType>(VSMAX(VSMIN(pixel, pixel_max), 0));
                     } else if (rowleft < 0 && mleft) {
                         if (blurmax > 0) {
                             blurlen = VSMIN(blurmax, -rowleft);
@@ -2560,7 +2560,7 @@ static void compensate_plane_bicubic(uint8_t *dstp8, const uint8_t *srcp8, int p
                     iy4 = ((int)((ysrc - hlow) * 256)) << 2; //changed to shift in v.1.1.1
 
                     int64_t pixel = (intcoef[iy4] * ts[0] + intcoef[iy4 + 1] * ts[1] + intcoef[iy4 + 2] * ts[2] + intcoef[iy4 + 3] * ts[3]) >> 22;
-                    dstp[row] = VSMAX(VSMIN(pixel, pixel_max), 0);
+                    dstp[row] = static_cast<PixelType>(VSMAX(VSMIN(pixel, pixel_max), 0));
                 } else {
                     if (hlow < 0 && mtop)
                         hlow = -hlow; // mirror borders
@@ -2703,7 +2703,7 @@ static const VSFrame *VS_CC depanCompensateGetFrame(int ndest, int activationRea
             const uint8_t *srcp = vsapi->getReadPtr(src, plane);
             int src_width = vsapi->getFrameWidth(src, plane);
             int src_height = vsapi->getFrameHeight(src, plane);
-            int src_pitch = vsapi->getStride(src, plane);
+            ptrdiff_t src_pitch = vsapi->getStride(src, plane);
 
             uint8_t *dstp = vsapi->getWritePtr(dst, plane);
 
@@ -3263,7 +3263,7 @@ static void InertialLimit(DepanStabiliseData *d, float *dxdif, float *dydif, flo
         *nbase = ndest;
     } else if (fabsf(*dxdif) > fabsf(dxmax)) {
         if (dxmax >= 0) {
-            *dxdif = *dxdif >= 0 ? sqrt(*dxdif * dxmax) : -sqrt(-*dxdif * dxmax); // soft limit v.1.8.2
+            *dxdif = *dxdif >= 0 ? sqrtf(*dxdif * dxmax) : -sqrtf(-*dxdif * dxmax); // soft limit v.1.8.2
         } else {
             *dxdif = 0;
             *dydif = 0;
@@ -3281,7 +3281,7 @@ static void InertialLimit(DepanStabiliseData *d, float *dxdif, float *dydif, flo
         *nbase = ndest;
     } else if (fabsf(*dydif) > fabsf(dymax)) {
         if (dymax >= 0) {
-            *dydif = *dydif >= 0 ? sqrt(*dydif * dymax) : -sqrt(-*dydif * dymax); // soft limit v.1.8.2
+            *dydif = *dydif >= 0 ? sqrtf(*dydif * dymax) : -sqrtf(-*dydif * dymax); // soft limit v.1.8.2
         } else {
             *dxdif = 0;
             *dydif = 0;
@@ -3299,7 +3299,7 @@ static void InertialLimit(DepanStabiliseData *d, float *dxdif, float *dydif, flo
         *nbase = ndest;
     } else if (fabsf(*zoomdif - 1) > fabsf(zoommax) - 1) {
         if (zoommax >= 0) {
-            *zoomdif = *zoomdif >= 1 ? 1 + sqrt(fabsf(*zoomdif - 1) * fabsf(zoommax - 1)) : 1 - sqrt(fabsf(*zoomdif - 1) * fabsf(zoommax - 1)); // soft limit v.1.8.2
+            *zoomdif = *zoomdif >= 1 ? 1 + sqrtf(fabsf(*zoomdif - 1) * fabsf(zoommax - 1)) : 1 - sqrtf(fabsf(*zoomdif - 1) * fabsf(zoommax - 1)); // soft limit v.1.8.2
         } else {
             *dxdif = 0;
             *dydif = 0;
@@ -3317,7 +3317,7 @@ static void InertialLimit(DepanStabiliseData *d, float *dxdif, float *dydif, flo
         *nbase = ndest;
     } else if (fabsf(*rotdif) > fabsf(rotmax)) {
         if (rotmax >= 0) {
-            *rotdif = *rotdif >= 0 ? sqrt(*rotdif * rotmax) : -sqrt(-*rotdif * rotmax); // soft limit v.1.8.2
+            *rotdif = *rotdif >= 0 ? sqrtf(*rotdif * rotmax) : -sqrtf(-*rotdif * rotmax); // soft limit v.1.8.2
         } else {
             *dxdif = 0;
             *dydif = 0;
@@ -3382,7 +3382,7 @@ static void compensateFrame(const VSFrame *src, VSFrame *dst, DepanStabiliseData
         const uint8_t *srcp = vsapi->getReadPtr(src, plane);
         int src_width = vsapi->getFrameWidth(src, plane);
         int src_height = vsapi->getFrameHeight(src, plane);
-        int src_pitch = vsapi->getStride(src, plane);
+        ptrdiff_t src_pitch = vsapi->getStride(src, plane);
 
         uint8_t *dstp = vsapi->getWritePtr(dst, plane);
 
@@ -3412,8 +3412,8 @@ static void fillBorderPrev(VSFrame *dst, DepanStabiliseData *d, int nbase, int n
         nprevbest = n;
         sumtransform(&tr[0], &trcur, &tr[0]);
         transform2motion(&tr[0], 1, d->xcenter, d->ycenter, d->pixaspect / d->nfields, &dxt1, &dyt1, &rott1, &zoomt1);
-        if ((fabs(dxt1) + fabs(dyt1) + ndest - n) < dabsmin) { // most centered and nearest
-            dabsmin = fabs(dxt1) + fabs(dyt1) + ndest - n;
+        if ((fabsf(dxt1) + fabsf(dyt1) + ndest - n) < dabsmin) { // most centered and nearest
+            dabsmin = fabsf(dxt1) + fabsf(dyt1) + ndest - n;
             nprevbest = n;
         }
     }
@@ -3442,7 +3442,7 @@ static void fillBorderPrev(VSFrame *dst, DepanStabiliseData *d, int nbase, int n
         const uint8_t *srcp = vsapi->getReadPtr(src, plane);
         int src_width = vsapi->getFrameWidth(src, plane);
         int src_height = vsapi->getFrameHeight(src, plane);
-        int src_pitch = vsapi->getStride(src, plane);
+        ptrdiff_t src_pitch = vsapi->getStride(src, plane);
 
         uint8_t *dstp = vsapi->getWritePtr(dst, plane);
 
@@ -3491,8 +3491,8 @@ static int fillBorderNext(VSFrame *dst, DepanStabiliseData *d, int ndest, const 
             inversetransform(&trcur, &trinv);
             sumtransform(&trinv, &tr[0], &tr[0]);
             transform2motion(&tr[0], 1, d->xcenter, d->ycenter, d->pixaspect / d->nfields, &dxt1, &dyt1, &rott1, &zoomt1);
-            if ((fabs(dxt1) + fabs(dyt1) + n - ndest) < dabsmin) { // most centered and nearest
-                dabsmin = fabs(dxt1) + fabs(dyt1) + n - ndest;
+            if ((fabsf(dxt1) + fabsf(dyt1) + n - ndest) < dabsmin) { // most centered and nearest
+                dabsmin = fabsf(dxt1) + fabsf(dyt1) + n - ndest;
                 nnextbest = n;
             }
         } else { // bad
@@ -3530,7 +3530,7 @@ static int fillBorderNext(VSFrame *dst, DepanStabiliseData *d, int ndest, const 
         const uint8_t *srcp = vsapi->getReadPtr(src, plane);
         int src_width = vsapi->getFrameWidth(src, plane);
         int src_height = vsapi->getFrameHeight(src, plane);
-        int src_pitch = vsapi->getStride(src, plane);
+        ptrdiff_t src_pitch = vsapi->getStride(src, plane);
 
         uint8_t *dstp = vsapi->getWritePtr(dst, plane);
 

@@ -78,9 +78,9 @@ void CheckAndPadMaskSmall(uint8_t * VS_RESTRICT MaskSmall, int nBlkXP, int nBlkY
 
 static inline void ByteOccMask(uint8_t * VS_RESTRICT occMask, int occlusion, double occnorm, double fGamma) {
     if (fGamma == 1.0)
-        *occMask = std::max<int>(*occMask, std::min<int>(255 * occlusion * occnorm, 255));
+        *occMask = std::max<uint8_t>(*occMask, static_cast<uint8_t>(std::min<double>(255 * occlusion * occnorm, 255)));
     else
-        *occMask = std::max<int>(*occMask, std::min<int>(255 * pow(occlusion * occnorm, fGamma), 255));
+        *occMask = std::max<uint8_t>(*occMask, static_cast<uint8_t>(std::min<double>(255 * pow(occlusion * occnorm, fGamma), 255)));
 }
 
 void MakeVectorOcclusionMaskTime(const FakeGroupOfPlanes *fgop, int isBackward, int nBlkX, int nBlkY, double dMaskNormDivider, double fGamma, int nPel, uint8_t * VS_RESTRICT occMask, ptrdiff_t occMaskPitch, int time256, int nBlkStepX, int nBlkStepY) { // analyse vectors field to detect occlusion
@@ -427,8 +427,7 @@ static void FlowInterExtra(
         for (int w = 0; w < width; w++) {
             int vxF = (VXFullF[w] * time256) >> 8;
             int vyF = (VYFullF[w] * time256) >> 8;
-            int adrF = vyF * ref_pitch + vxF + (w << nPelLog);
-            int dstF = prefF[adrF];
+            int dstF = prefF[vyF * ref_pitch + vxF + (w << nPelLog)];
 
             int vxFF = (VXFullFF[w] * time256) >> 8;
             int vyFF = (VYFullFF[w] * time256) >> 8;

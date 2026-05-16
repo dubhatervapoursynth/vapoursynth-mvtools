@@ -39,12 +39,12 @@ typedef struct SimpleResize SimpleResize;
 
 
 typedef void (*ResizeFunction8)(const SimpleResize *simple,
-                                uint8_t *dstp, int dst_stride,
-                                const uint8_t *srcp, int src_stride,
+                                uint8_t *dstp, ptrdiff_t dst_stride,
+                                const uint8_t *srcp, ptrdiff_t src_stride,
                                 int horizontal_vectors);
 typedef void (*ResizeFunction16)(const SimpleResize *simple,
-                                 int16_t *dstp, int dst_stride,
-                                 const int16_t *srcp, int src_stride,
+                                 int16_t *dstp, ptrdiff_t dst_stride,
+                                 const int16_t *srcp, ptrdiff_t src_stride,
                                  int horizontal_vectors);
 
 
