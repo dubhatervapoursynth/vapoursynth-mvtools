@@ -21,6 +21,7 @@
 #include <stdexcept>
 #include <unordered_map>
 
+#include <VSHelper4.h>
 #include "CPU.h"
 #include "Overlap.h"
 
@@ -333,7 +334,7 @@ OverlapsFunction selectOverlapsFunction(unsigned width, unsigned height, unsigne
 
 
 #define ToPixels(PixelType2, PixelType) \
-void ToPixels_##PixelType2##_##PixelType(uint8_t *pDst8, int nDstPitch, const uint8_t *pSrc8, int nSrcPitch, int nWidth, int nHeight, int bitsPerSample) { \
+void ToPixels_##PixelType2##_##PixelType(uint8_t * VS_RESTRICT pDst8, ptrdiff_t nDstPitch, const uint8_t * VS_RESTRICT pSrc8, ptrdiff_t nSrcPitch, int nWidth, int nHeight, int bitsPerSample) { \
     int pixelMax = (1 << bitsPerSample) - 1; \
  \
     for (int h = 0; h < nHeight; h++) { \

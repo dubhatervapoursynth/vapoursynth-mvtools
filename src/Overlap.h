@@ -47,12 +47,12 @@ typedef void (*OverlapsFunction)(uint8_t *pDst, intptr_t nDstPitch,
                                  int16_t *pWin, intptr_t nWinPitch);
 
 
-typedef void (*ToPixelsFunction)(uint8_t *pDst, int nDstPitch,
-                                 const uint8_t *pSrc, int nSrcPitch,
+typedef void (*ToPixelsFunction)(uint8_t *pDst, ptrdiff_t nDstPitch,
+                                 const uint8_t *pSrc, ptrdiff_t nSrcPitch,
                                  int width, int height, int bitsPerSample);
 
-void ToPixels_uint16_t_uint8_t(uint8_t *pDst8, int nDstPitch, const uint8_t *pSrc8, int nSrcPitch, int nWidth, int nHeight, int bitsPerSample);
-void ToPixels_uint32_t_uint16_t(uint8_t *pDst8, int nDstPitch, const uint8_t *pSrc8, int nSrcPitch, int nWidth, int nHeight, int bitsPerSample);
+void ToPixels_uint16_t_uint8_t(uint8_t *pDst8, ptrdiff_t nDstPitch, const uint8_t *pSrc8, ptrdiff_t nSrcPitch, int nWidth, int nHeight, int bitsPerSample);
+void ToPixels_uint32_t_uint16_t(uint8_t *pDst8, ptrdiff_t nDstPitch, const uint8_t *pSrc8, ptrdiff_t nSrcPitch, int nWidth, int nHeight, int bitsPerSample);
 
 OverlapsFunction selectOverlapsFunction(unsigned width, unsigned height, unsigned bits, int opt);
 
