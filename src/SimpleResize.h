@@ -26,6 +26,7 @@ extern "C" {
 
 
 #include <stdint.h>
+#include <stddef.h>
 
 
 enum {
