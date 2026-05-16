@@ -78,9 +78,9 @@ void CheckAndPadMaskSmall(uint8_t * VS_RESTRICT MaskSmall, int nBlkXP, int nBlkY
 
 static inline void ByteOccMask(uint8_t * VS_RESTRICT occMask, int occlusion, double occnorm, double fGamma) {
     if (fGamma == 1.0)
-        *occMask = std::max<uint8_t>(*occMask, std::min<int>(255 * occlusion * occnorm, 255));
+        *occMask = std::max<int>(*occMask, std::min<int>(255 * occlusion * occnorm, 255));
     else
-        *occMask = std::max<uint8_t>(*occMask, std::min<int>(255 * pow(occlusion * occnorm, fGamma), 255));
+        *occMask = std::max<int>(*occMask, std::min<int>(255 * pow(occlusion * occnorm, fGamma), 255));
 }
 
 void MakeVectorOcclusionMaskTime(const FakeGroupOfPlanes *fgop, int isBackward, int nBlkX, int nBlkY, double dMaskNormDivider, double fGamma, int nPel, uint8_t * VS_RESTRICT occMask, ptrdiff_t occMaskPitch, int time256, int nBlkStepX, int nBlkStepY) { // analyse vectors field to detect occlusion
