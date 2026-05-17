@@ -29,7 +29,7 @@ VS_EXTERNAL_API(void)
 VapourSynthPluginInit2(VSPlugin *plugin, const VSPLUGINAPI *vspapi) {
     const int packageVersion = atoi(PACKAGE_VERSION);
 
-    vspapi->configPlugin("com.nodame.mvtools", "mv", "MVTools v" PACKAGE_VERSION, VS_MAKE_VERSION(packageVersion, 0), VS_MAKE_VERSION(VAPOURSYNTH_API_MAJOR, VAPOURSYNTH_API_MINOR), 0, plugin);
+    vspapi->configPlugin("com.nodame.mvtools", "mv", "MVTools v" PACKAGE_VERSION, VS_MAKE_VERSION(packageVersion, 0), VAPOURSYNTH_API_VERSION, 0, plugin);
 
     mvsuperRegister(plugin, vspapi);
     mvanalyseRegister(plugin, vspapi);

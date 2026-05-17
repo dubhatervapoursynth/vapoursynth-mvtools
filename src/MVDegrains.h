@@ -218,7 +218,7 @@ static inline void normaliseWeights(int &WSrc, int *WRefs) {
     double scale = 256.0 / WSum;
 
     for (int r = 0; r < radius * 2; r++) {
-        WRefs[r] = WRefs[r] * scale;
+        WRefs[r] = static_cast<int>(WRefs[r] * scale);
         WSrc -= WRefs[r];
     }
 }
