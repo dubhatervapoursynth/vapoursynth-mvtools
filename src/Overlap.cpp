@@ -135,7 +135,7 @@ int16_t *overGetWindow(const OverlapWindows *over, int i) {
 
 
 template <unsigned blockWidth, unsigned blockHeight, typename PixelType2, typename PixelType>
-void overlaps_c(uint8_t *pDst8, intptr_t nDstPitch, const uint8_t *pSrc8, intptr_t nSrcPitch, int16_t *pWin, intptr_t nWinPitch) {
+void overlaps_c(uint8_t * VS_RESTRICT pDst8, ptrdiff_t nDstPitch, const uint8_t * VS_RESTRICT pSrc8, ptrdiff_t nSrcPitch, const int16_t * VS_RESTRICT pWin, ptrdiff_t nWinPitch) {
     /* pWin from 0 to 2048 */
     for (unsigned j = 0; j < blockHeight; j++) {
         for (unsigned i = 0; i < blockWidth; i++) {
@@ -167,7 +167,7 @@ template <unsigned blockWidth, unsigned blockHeight>
 struct OverlapsWrapper {
     static_assert(blockWidth >= 8, "");
 
-    static void overlaps_sse2(uint8_t *pDst8, intptr_t nDstPitch, const uint8_t *pSrc, intptr_t nSrcPitch, int16_t *pWin, intptr_t nWinPitch) {
+    static void overlaps_sse2(uint8_t *pDst8, ptrdiff_t nDstPitch, const uint8_t *pSrc, ptrdiff_t nSrcPitch, const int16_t *pWin, ptrdiff_t nWinPitch) {
         /* pWin from 0 to 2048 */
         for (unsigned y = 0; y < blockHeight; y++) {
             for (unsigned x = 0; x < blockWidth; x += 8) {
@@ -199,7 +199,7 @@ struct OverlapsWrapper {
 template <unsigned blockHeight>
 struct OverlapsWrapper<4, blockHeight> {
 
-    static void overlaps_sse2(uint8_t *pDst, intptr_t nDstPitch, const uint8_t *pSrc, intptr_t nSrcPitch, int16_t *pWin, intptr_t nWinPitch) {
+    static void overlaps_sse2(uint8_t *pDst, ptrdiff_t nDstPitch, const uint8_t *pSrc, ptrdiff_t nSrcPitch, const int16_t *pWin, ptrdiff_t nWinPitch) {
         /* pWin from 0 to 2048 */
         for (unsigned y = 0; y < blockHeight; y++) {
             __m128i src = _mm_cvtsi32_si128(*(const int *)pSrc);

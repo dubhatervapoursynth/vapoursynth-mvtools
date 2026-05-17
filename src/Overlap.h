@@ -41,9 +41,9 @@ void overDeinit(OverlapWindows *over);
 int16_t *overGetWindow(const OverlapWindows *over, int i);
 
 
-typedef void (*OverlapsFunction)(uint8_t *pDst, intptr_t nDstPitch,
-                                 const uint8_t *pSrc, intptr_t nSrcPitch,
-                                 int16_t *pWin, intptr_t nWinPitch);
+typedef void (*OverlapsFunction)(uint8_t *pDst, ptrdiff_t nDstPitch,
+                                 const uint8_t *pSrc, ptrdiff_t nSrcPitch,
+                                 const int16_t *pWin, ptrdiff_t nWinPitch);
 
 
 typedef void (*ToPixelsFunction)(uint8_t *pDst, ptrdiff_t nDstPitch,
