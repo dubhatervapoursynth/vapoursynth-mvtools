@@ -18,7 +18,6 @@ enum InstructionSets {
     AVX,
     XOP,
     AVX2,
-    NEON,
 };
 
 
@@ -29,16 +28,11 @@ enum InstructionSets {
 #endif
 
 
-#if defined(MVTOOLS_X86) || defined(MVTOOLS_ARM)
+#if defined(MVTOOLS_X86)
 
-#if defined(MVTOOLS_ARM)
-#include "sse2neon.h"
-#else
 #include <emmintrin.h>
-#endif
 
 #define zeroes _mm_setzero_si128()
-
 
 // This version used for width >= 16.
 template <unsigned width, unsigned height>
@@ -371,14 +365,6 @@ unsigned int sad_c(const uint8_t *pSrc8, intptr_t nSrcPitch, const uint8_t *pRef
 #define SAD_U16_SSE2(width, height) \
     { KEY(width, height, 16, SSE2), SADWrapperU16<width, height>::sad_u16_sse2 },
 
-#elif defined(MVTOOLS_ARM)
-
-#define SAD_U8_SSE2(width, height) \
-    { KEY(width, height, 8, SSE2), SADWrapperU8<width, height>::sad_u8_sse2 },
-
-#define SAD_U16_SSE2(width, height) \
-    { KEY(width, height, 16, SSE2), SADWrapperU16<width, height>::sad_u16_sse2 },
-
 #else
 #define SAD_X264_U8_MMX(width, height)
 #define SAD_X264_U8_MMX_CACHE64(width, height)
@@ -430,7 +416,6 @@ static const std::unordered_map<uint32_t, SADFunction> sad_functions = {
     SAD_X264_U8_SSE3(16, 16)
     SAD_X264_U8_SSSE3_CACHE64(16, 8)
     SAD_X264_U8_SSSE3_CACHE64(16, 16)
-#endif
     SAD_U8_SSE2(4, 2)
     SAD_U8_SSE2(8, 1)
     SAD_U8_SSE2(8, 2)
@@ -478,14 +463,14 @@ static const std::unordered_map<uint32_t, SADFunction> sad_functions = {
     SAD_U16_SSE2(128, 32)
     SAD_U16_SSE2(128, 64)
     SAD_U16_SSE2(128, 128)
+#endif
 };
 
 SADFunction selectSADFunction(unsigned width, unsigned height, unsigned bits, int opt, unsigned cpu) {
     SADFunction sad = sad_functions.at(KEY(width, height, bits, Scalar));
 
-#if defined(MVTOOLS_X86) || defined(MVTOOLS_ARM)
-    if (opt) {
 #if defined(MVTOOLS_X86)
+    if (opt) {
         try {
             sad = sad_functions.at(KEY(width, height, bits, MMX));
         } catch (std::out_of_range &) { }
@@ -517,16 +502,6 @@ SADFunction selectSADFunction(unsigned width, unsigned height, unsigned bits, in
             if (tmp)
                 sad = tmp;
         }
-#elif defined(MVTOOLS_ARM)
-        try {
-            sad = sad_functions.at(KEY(width, height, bits, SSE2));
-        } catch (std::out_of_range &) { }
-
-        try {
-            sad = sad_functions.at(KEY(width, height, bits, NEON));
-        } catch (std::out_of_range &) { }
-
-#endif
     }
 #endif
 
@@ -736,7 +711,6 @@ static unsigned int Satd_SIMD(const uint8_t *pSrc, intptr_t nSrcPitch, const uin
 #define SATD_X264_U8_AVX(width, height)
 #define SATD_X264_U8_XOP(width, height)
 #define SATD_X264_U8_AVX2(width, height)
-#define SATD_X264_U8_NEON(width, height)
 #endif
 
 #define SATD(width, height) \
@@ -758,10 +732,6 @@ static unsigned int Satd_SIMD(const uint8_t *pSrc, intptr_t nSrcPitch, const uin
     { KEY(width, height, 8, AVX), Satd_SIMD<width, height, AVX> }, \
     { KEY(width, height, 8, XOP), Satd_SIMD<width, height, XOP> }, \
     { KEY(width, height, 8, AVX2), Satd_SIMD<width, height, AVX2> },
-
-#elif defined(MVTOOLS_ARM)
-#define SATD_X264_U8(width, height) \
-    SATD_X264_U8_NEON(width, height)
 #endif
 
 static const std::unordered_map<uint32_t, SADFunction> satd_functions = {
@@ -797,9 +767,8 @@ static const std::unordered_map<uint32_t, SADFunction> satd_functions = {
 SADFunction selectSATDFunction(unsigned width, unsigned height, unsigned bits, int opt, unsigned cpu) {
     SADFunction satd = satd_functions.at(KEY(width, height, bits, Scalar));
 
-#if defined(MVTOOLS_X86) || defined(MVTOOLS_ARM)
+#if defined(MVTOOLS_X86) 
     if (opt) {
-#if defined(MVTOOLS_X86)
         try {
             satd = satd_functions.at(KEY(width, height, bits, MMX));
         } catch (std::out_of_range &) { }
@@ -837,15 +806,6 @@ SADFunction selectSATDFunction(unsigned width, unsigned height, unsigned bits, i
                 satd = satd_functions.at(KEY(width, height, bits, AVX2));
             } catch (std::out_of_range &) { }
         }
-#elif defined(MVTOOLS_ARM)
-        try {
-            satd = satd_functions.at(KEY(width, height, bits, SSE2));
-        } catch (std::out_of_range &) { }
-
-        try {
-            satd = satd_functions.at(KEY(width, height, bits, NEON));
-        } catch (std::out_of_range &) { }
-#endif
     }
 #endif
 
@@ -859,7 +819,6 @@ SADFunction selectSATDFunction(unsigned width, unsigned height, unsigned bits, i
 #undef SATD_X264_U8_AVX
 #undef SATD_X264_U8_XOP
 #undef SATD_X264_U8_AVX2
-#undef SATD_X264_U8_NEON
 #undef SATD
 
 #undef KEY
