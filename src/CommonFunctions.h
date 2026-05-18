@@ -1,11 +1,7 @@
 #ifndef __COMMON_F__
 #define __COMMON_F__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include <stdint.h>
+#include <cstdint>
 
 
 // returns a > 0 ? a : 0
@@ -78,9 +74,5 @@ inline static int64_t gcd(int64_t u, int64_t v) {
 
     return u << shift;
 }
-
-#ifdef __cplusplus
-} // extern "C"
-#endif
 
 #endif

@@ -1,6 +1,6 @@
 #include <mutex>
 #include <string>
-#include <math.h>
+#include <cmath>
 
 #include <fftw3.h>
 
@@ -4208,7 +4208,7 @@ static void VS_CC depanStabiliseCreate(const VSMap *in, VSMap *out, void *userDa
 }
 
 
-VS_EXTERN_C void mvdepanRegister(VSPlugin *plugin, const VSPLUGINAPI *vspapi) {
+void mvdepanRegister(VSPlugin *plugin, const VSPLUGINAPI *vspapi) {
     vspapi->registerFunction("DepanAnalyse",
                  "clip:vnode;"
                  "vectors:vnode;"

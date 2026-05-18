@@ -1,11 +1,8 @@
 #ifndef MVT_CPU_H
 #define MVT_CPU_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
-#include <stdint.h>
+#include <cstdint>
 
 
 #if defined(MVTOOLS_X86)
@@ -44,9 +41,9 @@ extern "C" {
 #define X264_CPU_SLOW_PSHUFB     0x2000000  /* such as on the Intel Atom */
 #define X264_CPU_SLOW_PALIGNR    0x4000000  /* such as on the AMD Bobcat */
 
-void mvtools_cpu_emms();
-void mvtools_cpu_cpuid(uint32_t op, uint32_t *eax, uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
-uint64_t mvtools_cpu_xgetbv(int xcr);
+extern "C" void mvtools_cpu_emms();
+extern "C" void mvtools_cpu_cpuid(uint32_t op, uint32_t *eax, uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
+extern "C" uint64_t mvtools_cpu_xgetbv(int xcr);
 
 #endif // MVTOOLS_X86
 
@@ -64,9 +61,5 @@ enum {
 };
 
 extern uint32_t g_cpuinfo;
-
-#ifdef __cplusplus
-} // extern "C"
-#endif
 
 #endif // MVT_CPU_H

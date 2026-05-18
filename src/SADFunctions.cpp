@@ -326,28 +326,6 @@ MK_CFUNC(mvtools_pixel_satd_16x16_avx2);
 
 #undef MK_CFUNC
 
-#elif defined(MVTOOLS_ARM)
-
-#define MK_CFUNC(functionname) extern "C" unsigned int functionname(const uint8_t *pSrc, intptr_t nSrcPitch, const uint8_t *pRef, intptr_t nRefPitch)
-
-// also stolen from x264
-
-MK_CFUNC(mvtools_pixel_sad_4x4_neon);
-MK_CFUNC(mvtools_pixel_sad_4x8_neon);
-MK_CFUNC(mvtools_pixel_sad_8x4_neon);
-MK_CFUNC(mvtools_pixel_sad_8x8_neon);
-MK_CFUNC(mvtools_pixel_sad_8x16_neon);
-MK_CFUNC(mvtools_pixel_sad_16x8_neon);
-MK_CFUNC(mvtools_pixel_sad_16x16_neon);
-
-MK_CFUNC(mvtools_pixel_satd_4x4_neon);
-MK_CFUNC(mvtools_pixel_satd_4x8_neon);
-MK_CFUNC(mvtools_pixel_satd_8x4_neon);
-MK_CFUNC(mvtools_pixel_satd_8x8_neon);
-MK_CFUNC(mvtools_pixel_satd_8x16_neon);
-MK_CFUNC(mvtools_pixel_satd_16x8_neon);
-MK_CFUNC(mvtools_pixel_satd_16x16_neon);
-
 #endif // MVTOOLS_X86 / ARM
 
 
@@ -394,9 +372,6 @@ unsigned int sad_c(const uint8_t *pSrc8, intptr_t nSrcPitch, const uint8_t *pRef
     { KEY(width, height, 16, SSE2), SADWrapperU16<width, height>::sad_u16_sse2 },
 
 #elif defined(MVTOOLS_ARM)
-
-#define SAD_X264_U8_NEON(width, height) \
-    { KEY(width, height, 8, NEON), mvtools_pixel_sad_##width##x##height##_neon },
 
 #define SAD_U8_SSE2(width, height) \
     { KEY(width, height, 8, SSE2), SADWrapperU8<width, height>::sad_u8_sse2 },
@@ -455,14 +430,6 @@ static const std::unordered_map<uint32_t, SADFunction> sad_functions = {
     SAD_X264_U8_SSE3(16, 16)
     SAD_X264_U8_SSSE3_CACHE64(16, 8)
     SAD_X264_U8_SSSE3_CACHE64(16, 16)
-#elif defined(MVTOOLS_ARM)
-    SAD_X264_U8_NEON(4, 4)
-    SAD_X264_U8_NEON(4, 8)
-    SAD_X264_U8_NEON(8, 4)
-    SAD_X264_U8_NEON(8, 8)
-    SAD_X264_U8_NEON(8, 16)
-    SAD_X264_U8_NEON(16, 8)
-    SAD_X264_U8_NEON(16, 16)
 #endif
     SAD_U8_SSE2(4, 2)
     SAD_U8_SSE2(8, 1)
@@ -571,7 +538,6 @@ SADFunction selectSADFunction(unsigned width, unsigned height, unsigned bits, in
 #undef SAD_X264_U8_SSE2
 #undef SAD_X264_U8_SSE3
 #undef SAD_X264_U8_SSSE3_CACHE64
-#undef SAD_X264_U8_NEON
 #undef SAD_U8_SSE2
 #undef SAD_U16_SSE2
 #undef SAD
@@ -739,25 +705,6 @@ static unsigned int Satd_SIMD(const uint8_t *pSrc, intptr_t nSrcPitch, const uin
 
     return sum;
 }
-#elif defined(MVTOOLS_ARM)
-template <unsigned nBlkWidth, unsigned nBlkHeight, InstructionSets opt>
-static unsigned int Satd_SIMD(const uint8_t *pSrc, intptr_t nSrcPitch, const uint8_t *pRef, intptr_t nRefPitch) {
-    const unsigned partition_width = 16;
-    const unsigned partition_height = 16;
-
-    unsigned sum = 0;
-
-    for (unsigned y = 0; y < nBlkHeight; y += partition_height) {
-        for (unsigned x = 0; x < nBlkWidth; x += partition_width) {
-			sum += mvtools_pixel_satd_16x16_neon(pSrc + x, nSrcPitch, pRef + x, nRefPitch);
-        }
-
-        pSrc += nSrcPitch * partition_height;
-        pRef += nRefPitch * partition_height;
-    }
-
-    return sum;
-}
 #endif
 
 #if defined(MVTOOLS_X86)
@@ -820,8 +767,6 @@ static unsigned int Satd_SIMD(const uint8_t *pSrc, intptr_t nSrcPitch, const uin
 #elif defined(MVTOOLS_ARM)
 #define SATD_X264_U8(width, height) \
     SATD_X264_U8_NEON(width, height)
-#define SATD_U8_SIMD(width, height) \
-    { KEY(width, height, 8, NEON), Satd_SIMD<width, height, NEON> },
 #endif
 
 static const std::unordered_map<uint32_t, SADFunction> satd_functions = {
@@ -836,11 +781,6 @@ static const std::unordered_map<uint32_t, SADFunction> satd_functions = {
     SATD(64, 64)
     SATD(128, 64)
     SATD(128, 128)
-    SATD_X264_U8(4, 4)
-    SATD_X264_U8(8, 4)
-    SATD_X264_U8(8, 8)
-    SATD_X264_U8(16, 8)
-    SATD_X264_U8(16, 16)
 #if defined(MVTOOLS_X86)
     SATD_X264_U8_MMX(4, 4)
     SATD_X264_U8_SSE2(8, 4)
@@ -850,8 +790,6 @@ static const std::unordered_map<uint32_t, SADFunction> satd_functions = {
     SATD_X264_U8_AVX2(8, 8)
     SATD_X264_U8_AVX2(16, 8)
     SATD_X264_U8_AVX2(16, 16)
-#endif
-#if defined(MVTOOLS_X86) || defined(MVTOOLS_ARM)
     SATD_U8_SIMD(32, 16)
     SATD_U8_SIMD(32, 32)
     SATD_U8_SIMD(64, 32)

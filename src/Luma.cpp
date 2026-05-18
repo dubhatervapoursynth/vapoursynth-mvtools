@@ -12,7 +12,7 @@ enum InstructionSets {
 
 
 template <unsigned width, unsigned height, typename PixelType>
-unsigned int luma_c(const uint8_t *pSrc8, intptr_t nSrcPitch) {
+unsigned int luma_c(const uint8_t *pSrc8, ptrdiff_t nSrcPitch) {
     unsigned int meanLuma = 0;
     for (unsigned j = 0; j < height; j++) {
         for (unsigned i = 0; i < width; i++) {
@@ -38,7 +38,7 @@ unsigned int luma_c(const uint8_t *pSrc8, intptr_t nSrcPitch) {
 
 
 template <unsigned width, unsigned height>
-unsigned int luma_sse2(const uint8_t *pSrc, intptr_t nSrcPitch) {
+unsigned int luma_sse2(const uint8_t *pSrc, ptrdiff_t nSrcPitch) {
     __m128i sum = zeroes;
 
     for (unsigned y = 0; y < height; y++) {

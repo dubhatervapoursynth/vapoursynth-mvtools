@@ -18,7 +18,7 @@
 #ifndef PLANEOFBLOCKS_H
 #define PLANEOFBLOCKS_H
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #include "Fakery.h"
 #include "MVFrame.h"
@@ -28,9 +28,6 @@
 #include "Luma.h"
 #include "DCTFFTW.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #define MAX_PREDICTOR 5 // right now 5 should be enough (TSchniede)
 
@@ -151,8 +148,5 @@ void pobSearchMVs(PlaneOfBlocks *pob, MVFrame *pSrcFrame, MVFrame *pRefFrame, Se
 
 MVArraySizeType pobWriteDefaultToArray(const PlaneOfBlocks *pob, uint8_t *array, int divideMode);
 
-#ifdef __cplusplus
-}
-#endif
 
 #endif

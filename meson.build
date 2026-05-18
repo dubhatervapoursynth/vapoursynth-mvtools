@@ -1,11 +1,11 @@
-project('MVTools', 'c', 'cpp',
+project('MVTools', 'cpp',
     default_options: [
-        'buildtype=release', 'warning_level=2', 'b_lto=true', 'b_ndebug=if-release', 'c_std=c11', 'cpp_std=c++17',
+        'buildtype=release', 'warning_level=2', 'b_lto=true', 'b_ndebug=if-release', 'cpp_std=c++17',
     ],
     license: 'GPL-2.0-or-later',
     license_files: 'LICENSE',
     meson_version: '>=1.2.3',
-    version: '27',
+    version: '28',
 )
 
 py = import('python').find_installation(pure: false)
@@ -16,12 +16,12 @@ incdir = include_directories(
 
 libs = []
 
-add_project_arguments('-DPACKAGE_VERSION="@0@"'.format(meson.project_version()), language: ['c', 'cpp'])
+add_project_arguments('-DPACKAGE_VERSION="@0@"'.format(meson.project_version()), language: ['cpp'])
 
 if host_machine.cpu_family() == 'x86_64'
     add_languages('nasm', native: false)
 
-    add_project_arguments('-DMVTOOLS_X86', language: ['c', 'cpp'])
+    add_project_arguments('-DMVTOOLS_X86', language: ['cpp'])
 
     add_project_arguments(
         '-DARCH_X86_64=1',
@@ -33,7 +33,7 @@ if host_machine.cpu_family() == 'x86_64'
     )
 
     if host_machine.system() == 'darwin'
-        add_project_arguments('-DPREFIX', language: ['c', 'cpp', 'nasm'])
+        add_project_arguments('-DPREFIX', language: ['cpp', 'nasm'])
     endif
 
     libs += static_library('avx2',
@@ -60,41 +60,36 @@ if host_machine.cpu_family() == 'x86_64'
         include_directories: include_directories('src/asm/include'),
     )
 elif host_machine.cpu_family() == 'aarch64'
-    add_project_arguments('-DMVTOOLS_ARM', language: ['c', 'cpp'])
-
-    libs += static_library('aarch64',
-        files('src/asm/aarch64-pixel-a.S'),
-        gnu_symbol_visibility: 'hidden',
-    )
+    add_project_arguments('-DMVTOOLS_ARM', language: ['cpp'])
 endif
 
 shared_module('mvtools',
     files(
         'src/CopyCode.cpp',
-        'src/CPU.c',
+        'src/CPU.cpp',
         'src/DCTFFTW.cpp',
-        'src/EntryPoint.c',
-        'src/Fakery.c',
-        'src/GroupOfPlanes.c',
+        'src/EntryPoint.cpp',
+        'src/Fakery.cpp',
+        'src/GroupOfPlanes.cpp',
         'src/Luma.cpp',
         'src/MaskFun.cpp',
-        'src/MVAnalyse.c',
-        'src/MVAnalysisData.c',
-        'src/MVBlockFPS.c',
-        'src/MVCompensate.c',
+        'src/MVAnalyse.cpp',
+        'src/MVAnalysisData.cpp',
+        'src/MVBlockFPS.cpp',
+        'src/MVCompensate.cpp',
         'src/MVDegrains.cpp',
         'src/MVDepan.cpp',
-        'src/MVFinest.c',
+        'src/MVFinest.cpp',
         'src/MVFlow.cpp',
-        'src/MVFlowBlur.c',
-        'src/MVFlowFPS.c',
-        'src/MVFlowFPSHelper.c',
-        'src/MVFlowInter.c',
+        'src/MVFlowBlur.cpp',
+        'src/MVFlowFPS.cpp',
+        'src/MVFlowFPSHelper.cpp',
+        'src/MVFlowInter.cpp',
         'src/MVFrame.cpp',
-        'src/MVMask.c',
-        'src/MVRecalculate.c',
-        'src/MVSCDetection.c',
-        'src/MVSuper.c',
+        'src/MVMask.cpp',
+        'src/MVRecalculate.cpp',
+        'src/MVSCDetection.cpp',
+        'src/MVSuper.cpp',
         'src/Overlap.cpp',
         'src/PlaneOfBlocks.cpp',
         'src/SADFunctions.cpp',

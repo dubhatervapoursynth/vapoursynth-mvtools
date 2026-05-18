@@ -140,7 +140,7 @@ static void Degrain_sse2(uint8_t * VS_RESTRICT pDst, ptrdiff_t nDstPitch, const 
     }
 }
 
-static void LimitChanges_sse2(uint8_t *pDst, intptr_t nDstPitch, const uint8_t *pSrc, intptr_t nSrcPitch, intptr_t nWidth, intptr_t nHeight, intptr_t nLimit) {
+static void LimitChanges_sse2(uint8_t *pDst, ptrdiff_t nDstPitch, const uint8_t *pSrc, ptrdiff_t nSrcPitch, int nWidth, int nHeight, ptrdiff_t nLimit) {
     __m128i bytes_limit = _mm_set1_epi8(nLimit);
 
     for (int y = 0; y < nHeight; y++) {
@@ -164,11 +164,11 @@ static void LimitChanges_sse2(uint8_t *pDst, intptr_t nDstPitch, const uint8_t *
 #endif // MVTOOLS_X86
 
 
-typedef void (*LimitFunction)(uint8_t *pDst, intptr_t nDstPitch, const uint8_t *pSrc, intptr_t nSrcPitch, intptr_t nWidth, intptr_t nHeight, intptr_t nLimit);
+typedef void (*LimitFunction)(uint8_t *pDst, ptrdiff_t nDstPitch, const uint8_t *pSrc, ptrdiff_t nSrcPitch, int nWidth, int nHeight, ptrdiff_t nLimit);
 
 
 template <typename PixelType>
-static void LimitChanges_C(uint8_t *pDst8, intptr_t nDstPitch, const uint8_t *pSrc8, intptr_t nSrcPitch, intptr_t nWidth, intptr_t nHeight, intptr_t nLimit) {
+static void LimitChanges_C(uint8_t * VS_RESTRICT pDst8, ptrdiff_t nDstPitch, const uint8_t * VS_RESTRICT pSrc8, ptrdiff_t nSrcPitch, int nWidth, int nHeight, ptrdiff_t nLimit) {
     for (int h = 0; h < nHeight; h++) {
         for (int i = 0; i < nWidth; i++) {
             const PixelType *pSrc = (const PixelType *)pSrc8;
@@ -218,7 +218,7 @@ static inline void normaliseWeights(int &WSrc, int *WRefs) {
     double scale = 256.0 / WSum;
 
     for (int r = 0; r < radius * 2; r++) {
-        WRefs[r] = WRefs[r] * scale;
+        WRefs[r] = static_cast<int>(WRefs[r] * scale);
         WSrc -= WRefs[r];
     }
 }

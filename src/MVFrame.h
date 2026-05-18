@@ -1,12 +1,8 @@
 #ifndef MVTOOLS_MVFRAME_H
 #define MVTOOLS_MVFRAME_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
-
-#include <stdint.h>
+#include <cstdint>
 
 typedef enum MVPlaneSet {
     YPLANE = (1 << 0),
@@ -157,8 +153,5 @@ void mvgofReduce(MVGroupOfFrames *mvgof, MVPlaneSet nMode, int rfilter);
 
 void mvgofResetState(MVGroupOfFrames *mvgof);
 
-#ifdef __cplusplus
-} // extern "C"
-#endif
 
 #endif // MVTOOLS_MVFRAME_H

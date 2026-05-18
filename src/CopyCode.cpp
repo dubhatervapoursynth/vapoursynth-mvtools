@@ -6,7 +6,7 @@
 #include "CPU.h"
 
 template <unsigned width, unsigned height>
-void copyBlock(uint8_t * __restrict pDst, intptr_t nDstPitch, const uint8_t * __restrict pSrc, intptr_t nSrcPitch) {
+void copyBlock(uint8_t * __restrict pDst, ptrdiff_t nDstPitch, const uint8_t * __restrict pSrc, ptrdiff_t nSrcPitch) {
     int unroll = (height >= 8 ? 8 : (height >= 4 ? 4 : (height >= 2 ? 2 : 1))) / ((width + 15) / 16);
     unroll = unroll < 1 ? 1 : unroll;
 

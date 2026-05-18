@@ -20,11 +20,8 @@
 #ifndef DCTFFTW_H
 #define DCTFFTW_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
-#include <stdint.h>
+#include <cstdint>
 
 #include <fftw3.h>
 
@@ -55,9 +52,5 @@ void dctInit(DCTFFTW *dct, int sizex, int sizey, int bitsPerSample, int opt);
 void dctDeinit(DCTFFTW *dct);
 
 void dctBytes2D(DCTFFTW *dct, const uint8_t *srcp, ptrdiff_t src_pitch, uint8_t *dctp, ptrdiff_t dct_pitch);
-
-#ifdef __cplusplus
-} // extern "C"
-#endif
 
 #endif // DCTFFTW_H

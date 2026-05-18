@@ -23,12 +23,9 @@
 #ifndef MVANALYSISDATA_H
 #define MVANALYSISDATA_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
-#include <stdint.h>
-#include <stdio.h>
+#include <cstdint>
+#include <cstdio>
 
 #include <VapourSynth4.h>
 
@@ -144,8 +141,5 @@ void adataCheckSimilarity(const MVAnalysisData *ad1, const MVAnalysisData *ad2, 
 //#define MOTION_DELTA_FRAME_BUFFER 5
 
 
-#ifdef __cplusplus
-} // extern "C"
-#endif
 
 #endif // MVANALYSISDATA_H

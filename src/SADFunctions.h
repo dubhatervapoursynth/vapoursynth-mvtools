@@ -20,11 +20,8 @@
 #ifndef SADFUNCTIONS_H
 #define SADFUNCTIONS_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
-#include <stdint.h>
+#include <cstdint>
 
 
 typedef unsigned int (*SADFunction)(const uint8_t *pSrc, intptr_t nSrcPitch,
@@ -40,8 +37,5 @@ SADFunction selectSATDFunction(unsigned width, unsigned height, unsigned bits, i
 SADFunction selectSADFunctionAVX2(unsigned width, unsigned height, unsigned bits);
 #endif
 
-#ifdef __cplusplus
-} // extern "C"
-#endif
 
 #endif

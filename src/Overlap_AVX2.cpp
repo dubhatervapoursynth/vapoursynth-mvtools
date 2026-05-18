@@ -8,7 +8,7 @@
 #include <immintrin.h>
 
 template <int blockWidth, int blockHeight>
-static void overlaps_avx2(uint8_t *pDst8, intptr_t nDstPitch, const uint8_t *pSrc, intptr_t nSrcPitch, int16_t *pWin, intptr_t nWinPitch) {
+static void overlaps_avx2(uint8_t *pDst8, ptrdiff_t nDstPitch, const uint8_t *pSrc, ptrdiff_t nSrcPitch, const int16_t *pWin, ptrdiff_t nWinPitch) {
     static_assert(blockWidth >= 16 || (blockWidth == 8 && blockHeight >= 2), "");
 
     int pitchMul = blockWidth == 8 ? 2 : 1;

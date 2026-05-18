@@ -1,9 +1,6 @@
 #ifndef MVFLOWFPSHELPER_H
 #define MVFLOWFPSHELPER_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #include <VapourSynth4.h>
 
@@ -42,8 +39,6 @@ static const char prop_VYFullUV[] = "VYFullUV";
 const VSFrame *VS_CC mvflowfpshelperGetFrame(int n, int activationReason, void *instanceData, void **frameData, VSFrameContext *frameCtx, VSCore *core, const VSAPI *vsapi);
 void VS_CC mvflowfpshelperFree(void *instanceData, VSCore *core, const VSAPI *vsapi);
 
-#ifdef __cplusplus
-} // extern "C"
-#endif
+
 
 #endif

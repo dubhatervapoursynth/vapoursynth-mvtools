@@ -18,9 +18,7 @@
 #ifndef GROUPOFPLANES_H
 #define GROUPOFPLANES_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+
 
 #include "DCTFFTW.h"
 #include "Fakery.h"
@@ -56,8 +54,5 @@ MVArraySizeType gopGetArraySize(GroupOfPlanes *gop);
 
 void gopExtraDivide(GroupOfPlanes *gop, uint8_t *out);
 
-#ifdef __cplusplus
-} // extern "C"
-#endif
 
 #endif

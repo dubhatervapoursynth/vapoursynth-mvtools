@@ -17,20 +17,14 @@
 // Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA, or visit
 // http://www.gnu.org/copyleft/gpl.html .
 
-#include <stdio.h>
+#include <cstdio>
+#include <algorithm>
 
 #include <VSHelper4.h>
 
 #include "CPU.h"
 #include "MVFrame.h"
 
-#ifndef max
-#define max(a, b) (((a) > (b)) ? (a) : (b))
-#endif
-
-#ifndef min
-#define min(a, b) (((a) < (b)) ? (a) : (b))
-#endif
 
 #if defined(MVTOOLS_X86) || defined(MVTOOLS_ARM)
 
@@ -549,7 +543,7 @@ static void RB2BilinearFilteredVertical(uint8_t * VS_RESTRICT pDst8, const uint8
         pDst += nDstPitch;
         pSrc += nSrcPitch * 2;
     }
-    for (int y = max(nHeight - 1, 1); y < nHeight; y++) {
+    for (int y = std::max(nHeight - 1, 1); y < nHeight; y++) {
         for (int x = 0; x < nWidth; x++)
             pDst[x] = (pSrc[x] + pSrc[x + nSrcPitch] + 1) / 2;
         pDst += nDstPitch;
@@ -586,7 +580,7 @@ static void RB2BilinearFilteredHorizontalInplace(uint8_t *VS_RESTRICT pSrc8, ptr
 
         pSrc[0] = pSrc0;
 
-        for (x = max(nWidth - 1, 1); x < nWidth; x++)
+        for (x = std::max(nWidth - 1, 1); x < nWidth; x++)
             pSrc[x] = (pSrc[x * 2] + pSrc[x * 2 + 1] + 1) / 2;
 
         pSrc += nSrcPitch;
@@ -653,7 +647,7 @@ static void RB2QuadraticVertical(uint8_t *VS_RESTRICT pDst8, const uint8_t *VS_R
         pDst += nDstPitch;
         pSrc += nSrcPitch * 2;
     }
-    for (int y = max(nHeight - 1, 1); y < nHeight; y++) {
+    for (int y = std::max(nHeight - 1, 1); y < nHeight; y++) {
         for (int x = 0; x < nWidth; x++)
             pDst[x] = (pSrc[x] + pSrc[x + nSrcPitch] + 1) / 2;
         pDst += nDstPitch;
@@ -703,7 +697,7 @@ static void RB2QuadraticHorizontalInplace(uint8_t *VS_RESTRICT pSrc8, ptrdiff_t 
 
         pSrc[0] = pSrc0;
 
-        for (x = max(nWidth - 1, 1); x < nWidth; x++)
+        for (x = std::max(nWidth - 1, 1); x < nWidth; x++)
             pSrc[x] = (pSrc[x * 2] + pSrc[x * 2 + 1] + 1) / 2;
 
         pSrc += nSrcPitch;
@@ -769,7 +763,7 @@ static void RB2CubicVertical(uint8_t * VS_RESTRICT pDst8, const uint8_t * VS_RES
         pDst += nDstPitch;
         pSrc += nSrcPitch * 2;
     }
-    for (int y = max(nHeight - 1, 1); y < nHeight; y++) {
+    for (int y = std::max(nHeight - 1, 1); y < nHeight; y++) {
         for (int x = 0; x < nWidth; x++)
             pDst[x] = (pSrc[x] + pSrc[x + nSrcPitch] + 1) / 2;
         pDst += nDstPitch;
@@ -819,7 +813,7 @@ static void RB2CubicHorizontalInplace(uint8_t * VS_RESTRICT pSrc8, ptrdiff_t nSr
 
         pSrc[0] = pSrcw0;
 
-        for (x = max(nWidth - 1, 1); x < nWidth; x++)
+        for (x = std::max(nWidth - 1, 1); x < nWidth; x++)
             pSrc[x] = (pSrc[x * 2] + pSrc[x * 2 + 1] + 1) / 2;
 
         pSrc += nSrcPitch;
@@ -872,7 +866,7 @@ static void VerticalWiener(uint8_t * VS_RESTRICT pDst8, const uint8_t * VS_RESTR
             m0 += m5 + m2 + 16;
             m0 >>= 5;
 
-            pDst[i] = max(0, min(m0, pixelMax));
+            pDst[i] = std::max(0, std::min(m0, pixelMax));
         }
         pDst += nPitch;
         pSrc += nPitch;
@@ -921,7 +915,7 @@ static void HorizontalWiener(uint8_t * VS_RESTRICT pDst8, const uint8_t * VS_RES
             m0 += m5 + m2 + 16;
             m0 >>= 5;
 
-            pDst[i] = max(0, min(m0, pixelMax));
+            pDst[i] = std::max(0, std::min(m0, pixelMax));
         }
 
         for (intptr_t i = nWidth - 4; i < nWidth - 1; i++)
@@ -953,7 +947,7 @@ static void VerticalBicubic(uint8_t * VS_RESTRICT pDst8, const uint8_t * VS_REST
     }
     for (int j = 1; j < nHeight - 3; j++) {
         for (int i = 0; i < nWidth; i++) {
-            pDst[i] = min(pixelMax, max(0,
+            pDst[i] = std::min(pixelMax, std::max(0,
                                         (-pSrc[i - nPitch] - pSrc[i + nPitch * 2] + (pSrc[i] + pSrc[i + nPitch]) * 9 + 8) >> 4));
         }
         pDst += nPitch;
@@ -986,7 +980,7 @@ static void HorizontalBicubic(uint8_t * VS_RESTRICT pDst8, const uint8_t * VS_RE
     for (int j = 0; j < nHeight; j++) {
         pDst[0] = (pSrc[0] + pSrc[1] + 1) >> 1;
         for (int i = 1; i < nWidth - 3; i++) {
-            pDst[i] = min(pixelMax, max(0,
+            pDst[i] = std::min(pixelMax, std::max(0,
                                         (-(pSrc[i - 1] + pSrc[i + 2]) + (pSrc[i] + pSrc[i + 1]) * 9 + 8) >> 4));
         }
         for (intptr_t i = nWidth - 3; i < nWidth - 1; i++)

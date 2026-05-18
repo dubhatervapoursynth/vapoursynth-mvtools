@@ -20,12 +20,8 @@
 #ifndef MASKFUN_H
 #define MASKFUN_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include <stdint.h>
-#include <stddef.h>
+#include <cstdint>
+#include <cstddef>
 
 #include "Fakery.h"
 #include "MVFrame.h"
@@ -85,8 +81,5 @@ typedef void (*FlowInterExtraFunction)(
 
 void selectFlowInterFunctions(FlowInterSimpleFunction *simple, FlowInterFunction *regular, FlowInterExtraFunction *extra, int bitsPerSample, int opt);
 
-#ifdef __cplusplus
-} // extern "C"
-#endif
 
 #endif

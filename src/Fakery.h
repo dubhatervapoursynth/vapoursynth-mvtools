@@ -1,10 +1,6 @@
 #ifndef MVTOOLS_FAKERY_H
 #define MVTOOLS_FAKERY_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 
 #include "MVAnalysisData.h"
 
@@ -74,9 +70,5 @@ const FakeBlockData *fgopGetBlock(const FakeGroupOfPlanes *fgop, int nLevel, int
 
 int fgopIsUsable(const FakeGroupOfPlanes *fgop, int64_t thscd1, int thscd2);
 
-
-#ifdef __cplusplus
-} // extern "C"
-#endif
 
 #endif // MVTOOLS_FAKERY_H

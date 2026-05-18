@@ -20,13 +20,8 @@
 #ifndef SIMPLERESIZE_H
 #define SIMPLERESIZE_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
-#include <stdint.h>
-#include <stddef.h>
+#include <cstdint>
+#include <cstddef>
 
 
 enum {
@@ -76,9 +71,5 @@ typedef struct SimpleResize {
 void simpleInit(SimpleResize *simple, int dst_width, int dst_height, int src_width, int src_height, int limit_width, int limit_height, int pel, int opt);
 void simpleDeinit(SimpleResize *simple);
 
-
-#ifdef __cplusplus
-} // extern "C"
-#endif
 
 #endif // SIMPLERESIZE_H

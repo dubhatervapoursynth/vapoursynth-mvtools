@@ -17,8 +17,8 @@
 // Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA, or visit
 // http://www.gnu.org/copyleft/gpl.html .
 
-#include <math.h>
-#include <string.h>
+#include <cmath>
+#include <cstring>
 #include <algorithm>
 #include <VSHelper4.h>
 

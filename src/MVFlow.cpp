@@ -17,10 +17,10 @@
 // Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA, or visit
 // http://www.gnu.org/copyleft/gpl.html .
 
-#include <limits.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
+#include <climits>
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
 
 #include <VapourSynth4.h>
 #include <VSHelper4.h>
@@ -592,7 +592,7 @@ static void VS_CC mvflowCreate(const VSMap *in, VSMap *out, void *userData, VSCo
 }
 
 
-extern "C" void mvflowRegister(VSPlugin *plugin, const VSPLUGINAPI *vspapi) {
+void mvflowRegister(VSPlugin *plugin, const VSPLUGINAPI *vspapi) {
     vspapi->registerFunction("Flow",
                  "clip:vnode;"
                  "super:vnode;"

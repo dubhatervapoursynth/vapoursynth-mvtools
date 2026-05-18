@@ -1,11 +1,10 @@
 #ifndef OVERLAP_H
 #define OVERLAP_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
-#include <stdint.h>
+#include <cstdint>
+#include <algorithm>
+#include <VSHelper4.h>
 
 // top, middle, botom and left, middle, right windows
 #define OW_TL 0
@@ -42,17 +41,34 @@ void overDeinit(OverlapWindows *over);
 int16_t *overGetWindow(const OverlapWindows *over, int i);
 
 
-typedef void (*OverlapsFunction)(uint8_t *pDst, intptr_t nDstPitch,
-                                 const uint8_t *pSrc, intptr_t nSrcPitch,
-                                 int16_t *pWin, intptr_t nWinPitch);
+typedef void (*OverlapsFunction)(uint8_t *pDst, ptrdiff_t nDstPitch,
+                                 const uint8_t *pSrc, ptrdiff_t nSrcPitch,
+                                 const int16_t *pWin, ptrdiff_t nWinPitch);
 
 
 typedef void (*ToPixelsFunction)(uint8_t *pDst, ptrdiff_t nDstPitch,
                                  const uint8_t *pSrc, ptrdiff_t nSrcPitch,
                                  int width, int height, int bitsPerSample);
 
-void ToPixels_uint16_t_uint8_t(uint8_t *pDst8, ptrdiff_t nDstPitch, const uint8_t *pSrc8, ptrdiff_t nSrcPitch, int nWidth, int nHeight, int bitsPerSample);
-void ToPixels_uint32_t_uint16_t(uint8_t *pDst8, ptrdiff_t nDstPitch, const uint8_t *pSrc8, ptrdiff_t nSrcPitch, int nWidth, int nHeight, int bitsPerSample);
+template<typename PixelType2, typename PixelType>
+void ToPixels(uint8_t *VS_RESTRICT pDst8, ptrdiff_t nDstPitch, const uint8_t *VS_RESTRICT pSrc8, ptrdiff_t nSrcPitch, int nWidth, int nHeight, int bitsPerSample) {
+    int pixelMax = (1 << bitsPerSample) - 1;
+
+    for (int h = 0; h < nHeight; h++) {
+        for (int i = 0; i < nWidth; i++) {
+            const PixelType2 *pSrc = (const PixelType2 *)pSrc8;
+            PixelType *pDst = (PixelType *)pDst8;
+
+            int a = (pSrc[i] + 16) >> 5;
+            if (sizeof(PixelType) == 1)
+                pDst[i] = a | ((255 - a) >> (sizeof(int) * 8 - 1));
+            else
+                pDst[i] = std::min(pixelMax, a);
+        }
+        pDst8 += nDstPitch;
+        pSrc8 += nSrcPitch;
+    }
+}   
 
 OverlapsFunction selectOverlapsFunction(unsigned width, unsigned height, unsigned bits, int opt);
 
@@ -60,8 +76,5 @@ OverlapsFunction selectOverlapsFunction(unsigned width, unsigned height, unsigne
 OverlapsFunction selectOverlapsFunctionAVX2(unsigned width, unsigned height, unsigned bits);
 #endif
 
-#ifdef __cplusplus
-} // extern "C"
-#endif
 
 #endif // OVERLAP_H
