@@ -728,11 +728,6 @@ static unsigned int Satd_SIMD(const uint8_t *pSrc, intptr_t nSrcPitch, const uin
 
 #define SATD_X264_U8_AVX2(width, height) \
     { KEY(width, height, 8, AVX2), mvtools_pixel_satd_##width##x##height##_avx2 },
-
-#elif defined(MVTOOLS_ARM)
-#define SATD_X264_U8_NEON(width, height) \
-    { KEY(width, height, 8, NEON), mvtools_pixel_satd_##width##x##height##_neon },
-
 #else
 #define SATD_X264_U8_MMX(width, height)
 #define SATD_X264_U8_SSE2(width, height)
