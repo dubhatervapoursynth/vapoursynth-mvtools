@@ -599,7 +599,7 @@ static void VS_CC depanAnalyseCreate(const VSMap *in, VSMap *out, void *userData
         {data->mask, rpStrictSpatial},
     };
 
-    vsapi->createVideoFilter(out, "DepanAnalyse", data->vi, depanAnalyseGetFrame, depanAnalyseFree, fmParallel, deps, ARRAY_SIZE(deps), data, core);
+    vsapi->createVideoFilter(out, "DepanAnalyse", data->vi, depanAnalyseGetFrame, depanAnalyseFree, fmParallel, deps, data->mask ? ARRAY_SIZE(deps) : (ARRAY_SIZE(deps) - 1), data, core);
 
     if (vsapi->mapGetError(out)) {
         depanAnalyseFree(data, core, vsapi);
