@@ -208,13 +208,13 @@ static void RejectBadBlocks(const transform *tr, const float *blockDx, const flo
                 blockWeight[n] = 0; // disable  blocks near frame borders
             } else if (blockSAD[n] > thSCD1) {
                 blockWeight[n] = 0; // disable bad block with big SAD
-            } else if (i > 0 && i < (nBlkX - 1) && (fabsf((blockDx[n - 1 - nBlkX] + blockDx[n - nBlkX] + blockDx[n + 1 - nBlkX] +
+            } else if (i > 0 && i < (nBlkX - 1) && j > 0 && j < (nBlkY - 1) && (fabsf((blockDx[n - 1 - nBlkX] + blockDx[n - nBlkX] + blockDx[n + 1 - nBlkX] +
                                                           blockDx[n - 1] + blockDx[n + 1] +
                                                           blockDx[n - 1 + nBlkX] + blockDx[n + nBlkX] + blockDx[n + 1 + nBlkX]) /
                                                              8 -
                                                          blockDx[n]) > wrongDif)) {
                 blockWeight[n] = 0; // disable blocks very different from neighbours
-            } else if (j > 0 && j < (nBlkY - 1) && (fabsf((blockDy[n - 1 - nBlkX] + blockDy[n - nBlkX] + blockDy[n + 1 - nBlkX] +
+            } else if (i > 0 && i < (nBlkX - 1) && j > 0 && j < (nBlkY - 1) && (fabsf((blockDy[n - 1 - nBlkX] + blockDy[n - nBlkX] + blockDy[n + 1 - nBlkX] +
                                                           blockDy[n - 1] + blockDy[n + 1] +
                                                           blockDy[n - 1 + nBlkX] + blockDy[n + nBlkX] + blockDy[n + 1 + nBlkX]) /
                                                              8 -
@@ -3754,7 +3754,7 @@ static const VSFrame *VS_CC depanStabiliseGetFrame1(int ndest, int activationRea
             }
 
             if (d->next) {
-                for (int i = nmax + 1; i <= ndest; i++) {
+                for (int i = nmax + 1; i <= nnext; i++) {
                     if (d->motionx[i] == MOTIONUNKNOWN)
                         vsapi->requestFrameFilter(i, d->data, frameCtx);
                     vsapi->requestFrameFilter(i, d->clip, frameCtx);
