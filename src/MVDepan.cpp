@@ -3254,7 +3254,7 @@ static void InertialLimit(DepanStabiliseData *d, float *dxdif, float *dydif, flo
     const float rotmax = d->rotmax;
 
     // limit max motion corrections
-    if (!(isfinite(*dxdif))) // check added in v.1.1.3
+    if (!(std::isfinite(*dxdif))) // check added in v.1.1.3
     {                       // infinite or NAN
         *dxdif = 0;
         *dydif = 0;
@@ -3273,7 +3273,7 @@ static void InertialLimit(DepanStabiliseData *d, float *dxdif, float *dydif, flo
         }
     }
 
-    if (!(isfinite(*dydif))) { // infinite or NAN
+    if (!(std::isfinite(*dydif))) { // infinite or NAN
         *dxdif = 0;
         *dydif = 0;
         *zoomdif = initzoom;
@@ -3291,7 +3291,7 @@ static void InertialLimit(DepanStabiliseData *d, float *dxdif, float *dydif, flo
         }
     }
 
-    if (!(isfinite(*zoomdif))) { // infinite or NAN
+    if (!(std::isfinite(*zoomdif))) { // infinite or NAN
         *dxdif = 0;
         *dydif = 0;
         *zoomdif = initzoom;
@@ -3309,7 +3309,7 @@ static void InertialLimit(DepanStabiliseData *d, float *dxdif, float *dydif, flo
         }
     }
 
-    if (!(isfinite(*rotdif))) { // infinite or NAN
+    if (!(std::isfinite(*rotdif))) { // infinite or NAN
         *dxdif = 0;
         *dydif = 0;
         *zoomdif = initzoom;
