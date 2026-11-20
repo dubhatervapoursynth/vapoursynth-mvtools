@@ -67,6 +67,7 @@ jobs:
           mingw-w64-clang-x86_64-git
           mingw-w64-clang-x86_64-nasm
           mingw-w64-clang-x86_64-ninja
+          mingw-w64-clang-x86_64-pkgconf
           mingw-w64-clang-x86_64-python-wheel
           mingw-w64-clang-x86_64-toolchain
           mingw-w64-clang-x86_64-uv
