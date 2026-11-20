@@ -1,3 +1,11 @@
+MVTools is no longer actively developed
+=======================================
+
+`MVUtensils <https://github.com/myrsloik/mvutensils>`_ is a vastly improved fork of this plugin:
+it is much faster and fixes a lot of long-standing bugs. New scripts should use it instead.
+vapoursynth-mvtools is no longer actively developed.
+
+
 Description
 ===========
 
@@ -13,6 +21,18 @@ The filters DepanCompensate and DepanStabilise were ported from the Avisynth plu
 
 Note that some functions such as MVShow are missing. Replacements for this functionality can be found in https://pypi.org/project/vapoursynth-manipmv/
 and will therefore never be implemented in this plugin.
+
+
+Installation
+============
+
+The plugin is published on PyPI as `vapoursynth-mvtools <https://pypi.org/project/vapoursynth-mvtools/>`_::
+
+    python -m pip install vapoursynth-mvtools
+
+Wheels are provided for Windows on x86-64, and for macOS and Linux on both x86-64 and arm64.
+
+The wheel places the plugin in the ``vapoursynth/plugins`` directory of the target Python environment, which VapourSynth autoloads, so no further setup is needed.
 
 
 Differences
@@ -57,6 +77,9 @@ Differences
     * No "recursion" parameter. It was dodgy.
 
     * New parameter "tff".
+
+* Degrain:
+    * New filters Degrain4, Degrain5, and Degrain6, using up to four, five, and six frames in each temporal direction.
 
 * Flow
     * New parameter "tff".
@@ -108,6 +131,12 @@ Usage
 
     mv.Degrain3(clip clip, clip super, clip mvbw, clip mvfw, clip mvbw2, clip mvfw2, clip mvbw3, clip mvfw3[, int thsad=400, int thsadc=thsad, int plane=4, int limit=255, int limitc=limit, int thscd1=400, int thscd2=130, bint opt=True])
 
+    mv.Degrain4(clip clip, clip super, clip mvbw, clip mvfw, clip mvbw2, clip mvfw2, clip mvbw3, clip mvfw3, clip mvbw4, clip mvfw4[, int thsad=400, int thsadc=thsad, int plane=4, int limit=255, int limitc=limit, int thscd1=400, int thscd2=130, bint opt=True])
+
+    mv.Degrain5(clip clip, clip super, clip mvbw, clip mvfw, clip mvbw2, clip mvfw2, clip mvbw3, clip mvfw3, clip mvbw4, clip mvfw4, clip mvbw5, clip mvfw5[, int thsad=400, int thsadc=thsad, int plane=4, int limit=255, int limitc=limit, int thscd1=400, int thscd2=130, bint opt=True])
+
+    mv.Degrain6(clip clip, clip super, clip mvbw, clip mvfw, clip mvbw2, clip mvfw2, clip mvbw3, clip mvfw3, clip mvbw4, clip mvfw4, clip mvbw5, clip mvfw5, clip mvbw6, clip mvfw6[, int thsad=400, int thsadc=thsad, int plane=4, int limit=255, int limitc=limit, int thscd1=400, int thscd2=130, bint opt=True])
+
     mv.Mask(clip clip, clip vectors[, float ml=100.0, float gamma=1.0, int kind=0, float time=100.0, int ysc=0, int thscd1=400, int thscd2=130, bint opt=True])
 
     mv.Finest(clip super[, bint opt=True])
@@ -134,6 +163,8 @@ Usage
 
 
 If *fields* is True, it is assumed that the clip named *clip* first went through std.SeparateFields.
+
+Degrain4, Degrain5, and Degrain6 work like Degrain1 through Degrain3, only with a larger temporal radius. As with Degrain2 and Degrain3, the vector clips are passed in pairs: *mvbwN* must come from Analyse with isb=True, *mvfwN* from Analyse with isb=False, and every pair must have been analysed with a greater *delta* than the pair before it (normally *delta* = N).
 
 For information about the other parameters, consult the Avisynth plugins' documentation at http://avisynth.org.ru/mvtools/mvtools2.html or http://www.avisynth.nl/users/fizick/depan/depan.html. This will not be necessary in the future.
 
